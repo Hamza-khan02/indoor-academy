@@ -86,11 +86,24 @@ model Student {
   payments      FeePayment[]
   assessments   Assessment[]
   reminders     Reminder[]
+  photo         StudentPhoto?
+  // Set when a profile photo is saved; used as the image's cache-busting version. Null = no photo.
+  photoUpdatedAt DateTime?
   createdAt     DateTime     @default(now())
 
   @@index([branchId])
   @@index([batchId])
   @@index([guardianPhoneKey])
+}
+
+// Student profile photo, stored in the database so it moves with the data (small JPEG, resized in the browser).
+model StudentPhoto {
+  studentId String   @id
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+  updatedBy String? // staff name, or "Parent / student"
+  updatedAt DateTime @updatedAt
 }
 
 // Parent / student app login. One per guardian phone; it shows every student with that phone.

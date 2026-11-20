@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Download, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
+import { photoUrl } from '@/lib/photos';
 import { requireUser } from '@/lib/auth';
 import { addDays, todayISO } from '@/lib/dates';
 import { STUDENT_STATUS } from '@/lib/constants';
@@ -81,7 +82,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Sea
                   <tr key={s.id}>
                     <td>
                       <Link href={`/students/${s.id}`} className="player-cell">
-                        <Avatar name={s.name} />
+                        <Avatar name={s.name} photo={photoUrl(s)} />
                         <div><b>{s.name}</b><small>{s.ageGroup}{s.playingRole ? ` · ${s.playingRole}` : ''}</small></div>
                       </Link>
                     </td>

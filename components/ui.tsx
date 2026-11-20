@@ -67,8 +67,13 @@ export function Empty({ title, children, action }: { title: string; children?: R
   );
 }
 
-export function Avatar({ name, small }: { name: string; small?: boolean }) {
-  return <div className={`avatar player ${avatarClass(name)} ${small ? 'sm' : ''}`}>{initials(name)}</div>;
+/** Student photo when there is one (see photoUrl in lib/photos), otherwise coloured initials. */
+export function Avatar({ name, small, photo }: { name: string; small?: boolean; photo?: string | null }) {
+  return (
+    <div className={`avatar player ${avatarClass(name)} ${small ? 'sm' : ''} ${photo ? 'has-photo' : ''}`}>
+      {photo ? <img src={photo} alt="" loading="lazy" /> : initials(name)}
+    </div>
+  );
 }
 
 export function StatusPill({ status, labels = STUDENT_STATUS }: { status: string; labels?: Record<string, string> }) {

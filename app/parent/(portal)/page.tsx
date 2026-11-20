@@ -6,7 +6,10 @@ import { ATTENDANCE_STATUS, DAYS, PAYMENT_METHODS, TOURNAMENT_STATUS } from '@/l
 import { addDays, currentMonth, formatDate, formatLongDate, formatTime, monthLabel, todayISO, weekdayShort } from '@/lib/dates';
 import { inr, percent } from '@/lib/format';
 import { attended } from '@/lib/queries';
-import { AttendanceBar, Avatar, Empty, Panel, StatusPill } from '@/components/ui';
+import { AttendanceBar, Empty, Panel, StatusPill } from '@/components/ui';
+import { PhotoEditor } from '@/components/PhotoEditor';
+import { photoUrl } from '@/lib/photos';
+import { removeChildPhoto, uploadChildPhoto } from '@/lib/photo-actions';
 
 const SKILLS = [['batting', 'Batting'], ['bowling', 'Bowling'], ['fielding', 'Fielding'], ['fitness', 'Fitness']] as const;
 type Scores = { batting: number; bowling: number; fielding: number; fitness: number };
@@ -76,7 +79,12 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
       )}
 
       <section className="portal-hero panel padded">
-        <Avatar name={student.name} />
+        <PhotoEditor
+          name={student.name}
+          photo={photoUrl(student)}
+          upload={uploadChildPhoto.bind(null, student.id)}
+          remove={removeChildPhoto.bind(null, student.id)}
+        />
         <div className="portal-hero-copy">
           <h1>{student.name}</h1>
           <p>{student.ageGroup}{student.playingRole ? ` · ${student.playingRole}` : ''} · {student.batch?.name ?? 'No batch yet'} · {student.branch.name}</p>

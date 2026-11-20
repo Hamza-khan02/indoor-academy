@@ -11,6 +11,9 @@ import { whatsappUrl } from '@/lib/messages';
 import { absenceNoticeUrl, feeReminderUrl, getSettings, receiptMessageUrl } from '@/lib/settings';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { ParentAccessButton } from '@/components/ParentAccessButton';
+import { PhotoEditor } from '@/components/PhotoEditor';
+import { photoUrl } from '@/lib/photos';
+import { removeStudentPhoto, uploadStudentPhoto } from '@/lib/photo-actions';
 import { ensurePhoneKeys, phoneKey } from '@/lib/family';
 import { FormModal } from '@/components/FormModal';
 import { ConfirmAction } from '@/components/ConfirmAction';
@@ -37,7 +40,11 @@ export default async function StudentPage({ params }: { params: { id: string } }
     },
   });
   if (!student) notFound();
-  const [options, settings] = await Promise.all([formOptions(), getSettings()]);
+  const [options, settings, photoInfo] = await Promise.all([
+    formOptions(),
+    getSettings(),
+    db.studentPhoto.findUnique({ where: { studentId: student.id }, select: { updatedBy: true, updatedAt: true } }),
+  ]);
   const contact = { ...student, batchName: student.batch?.name };
   const lastAbsence = student.attendance.find((a) => a.status === 'ABSENT' && a.date >= addDays(todayISO(), -13));
 
@@ -65,10 +72,18 @@ export default async function StudentPage({ params }: { params: { id: string } }
     <>
       <Link href="/students" className="back-link"><ArrowLeft size={14} /> All students</Link>
       <div className="profile-head panel padded">
-        <Avatar name={student.name} />
+        <PhotoEditor
+          name={student.name}
+          photo={photoUrl(student)}
+          upload={uploadStudentPhoto.bind(null, student.id)}
+          remove={removeStudentPhoto.bind(null, student.id)}
+        />
         <div className="profile-head-copy">
           <h1>{student.name}</h1>
           <p>{student.ageGroup}{student.playingRole ? ` · ${student.playingRole}` : ''}{age !== null ? ` · ${age} years` : ''} · {student.branch.name}</p>
+          {photoInfo && (
+            <small className="muted block">Photo updated {formatDate(todayISO(photoInfo.updatedAt))}{photoInfo.updatedBy ? ` by ${photoInfo.updatedBy}` : ''}</small>
+          )}
         </div>
         <StatusPill status={student.status} />
         <div className="row-actions">

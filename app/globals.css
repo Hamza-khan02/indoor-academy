@@ -440,6 +440,22 @@ a.player-cell:hover b { color:#ff8a8a }
   .portal-header .secondary-btn { padding:0 10px }
 }
 
+/* ---------- Student photos ---------- */
+.avatar { overflow:hidden; position:relative }
+.avatar.has-photo { background:#25252b }
+.avatar img { width:100%; height:100%; object-fit:cover; display:block }
+.photo-editor { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:88px }
+.avatar.big { width:72px; height:72px; border-radius:18px; font-size:22px; border:0; padding:0; cursor:pointer; font-family:inherit; font-weight:700; overflow:visible }
+.avatar.big img { border-radius:18px }
+.avatar.big:disabled { cursor:wait; opacity:.7 }
+.photo-badge { position:absolute; right:-5px; bottom:-5px; width:22px; height:22px; border-radius:50%; background:#ef4444; color:#fff; display:grid; place-items:center; border:2px solid #141418 }
+.photo-actions { display:flex; gap:10px; align-items:center }
+.photo-actions .text-btn { font-size:10px }
+.text-btn.subtle { color:#85858f }
+.text-btn.subtle:hover { color:#f87171 }
+.photo-editor small { font-size:10px; text-align:center; max-width:160px }
+.profile-head .photo-editor .avatar, .portal-hero .photo-editor .avatar { width:72px; height:72px; font-size:22px; border-radius:18px }
+
 /* ---------- Responsive ---------- */
 @media (max-width:1200px) {
   .content { padding:27px 24px }

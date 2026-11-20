@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Download, FileText, Plus, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
+import { photoUrl } from '@/lib/photos';
 import { requireAdminPage } from '@/lib/auth';
 import { PAYMENT_METHODS } from '@/lib/constants';
 import { currentMonth, formatDate, monthLabel, todayISO } from '@/lib/dates';
@@ -23,7 +24,7 @@ export default async function FeesPage({ searchParams }: { searchParams: { month
     db.student.findMany({
       where: { status: { not: 'INACTIVE' } },
       orderBy: { name: 'asc' },
-      select: { id: true, name: true, guardianName: true, guardianPhone: true, batch: { select: { name: true, monthlyFee: true } } },
+      select: { id: true, name: true, guardianName: true, guardianPhone: true, photoUpdatedAt: true, batch: { select: { name: true, monthlyFee: true } } },
     }),
     db.feePayment.findMany({
       where: { forMonth: month },
@@ -100,7 +101,7 @@ export default async function FeesPage({ searchParams }: { searchParams: { month
                     const sent = reminded.get(r.id);
                     return (
                       <tr key={r.id}>
-                        <td><Link href={`/students/${r.id}`} className="player-cell"><Avatar name={r.name} small /><div><b>{r.name}</b><small>{r.guardianPhone}</small></div></Link></td>
+                        <td><Link href={`/students/${r.id}`} className="player-cell"><Avatar name={r.name} small photo={photoUrl(r)} /><div><b>{r.name}</b><small>{r.guardianPhone}</small></div></Link></td>
                         <td><span className="batch-tag">{r.batch!.name}</span></td>
                         <td>{inr(r.fee)}</td>
                         <td>{inr(r.paid)}</td>

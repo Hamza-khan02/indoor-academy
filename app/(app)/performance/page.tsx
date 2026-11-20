@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Plus, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
+import { photoUrl } from '@/lib/photos';
 import { requireUser } from '@/lib/auth';
 import { LOW_ATTENDANCE } from '@/lib/constants';
 import { addDays, formatDate, todayISO } from '@/lib/dates';
@@ -19,14 +20,14 @@ export default async function PerformancePage() {
   const students = await db.student.findMany({
     where: { status: { not: 'INACTIVE' } },
     orderBy: { name: 'asc' },
-    select: { id: true, name: true, ageGroup: true, status: true, batch: { select: { name: true } } },
+    select: { id: true, name: true, ageGroup: true, status: true, photoUpdatedAt: true, batch: { select: { name: true } } },
   });
   const [assessments, attendance] = await Promise.all([
     db.assessment.findMany({
       where: { student: { status: { not: 'INACTIVE' } } },
       orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
       take: 300,
-      include: { student: { select: { name: true } } },
+      include: { student: { select: { name: true, photoUpdatedAt: true } } },
     }),
     attendanceByStudent(students.map((s) => s.id), addDays(todayISO(), -29)),
   ]);
@@ -58,7 +59,7 @@ export default async function PerformancePage() {
               {topRated.length === 0 ? <Empty title="No assessments yet" /> : (
                 <ol className="rank-list">
                   {topRated.map((a) => (
-                    <li key={a.id}><Link href={`/students/${a.studentId}`}><Avatar name={a.student.name} small /><span>{a.student.name}</span><b>{avg(a).toFixed(1)}</b></Link></li>
+                    <li key={a.id}><Link href={`/students/${a.studentId}`}><Avatar name={a.student.name} small photo={photoUrl({ id: a.studentId, photoUpdatedAt: a.student.photoUpdatedAt })} /><span>{a.student.name}</span><b>{avg(a).toFixed(1)}</b></Link></li>
                   ))}
                 </ol>
               )}
@@ -67,7 +68,7 @@ export default async function PerformancePage() {
               {leaders.length === 0 ? <Empty title="No attendance marked yet" /> : (
                 <ol className="rank-list">
                   {leaders.map((s) => (
-                    <li key={s.id}><Link href={`/students/${s.id}`}><Avatar name={s.name} small /><span>{s.name}</span><b>{s.pct}%</b></Link></li>
+                    <li key={s.id}><Link href={`/students/${s.id}`}><Avatar name={s.name} small photo={photoUrl(s)} /><span>{s.name}</span><b>{s.pct}%</b></Link></li>
                   ))}
                 </ol>
               )}
@@ -76,7 +77,7 @@ export default async function PerformancePage() {
               {attention.length === 0 ? <Empty title="Nobody flagged" /> : (
                 <ul className="rank-list">
                   {attention.slice(0, 8).map((s) => (
-                    <li key={s.id}><Link href={`/students/${s.id}`}><Avatar name={s.name} small /><span>{s.name}</span><AttendanceBar pct={s.pct} /></Link></li>
+                    <li key={s.id}><Link href={`/students/${s.id}`}><Avatar name={s.name} small photo={photoUrl(s)} /><span>{s.name}</span><AttendanceBar pct={s.pct} /></Link></li>
                   ))}
                 </ul>
               )}
@@ -91,7 +92,7 @@ export default async function PerformancePage() {
                   <tbody>
                     {assessments.slice(0, 30).map((a) => (
                       <tr key={a.id}>
-                        <td><Link href={`/students/${a.studentId}`} className="player-cell"><Avatar name={a.student.name} small /><b>{a.student.name}</b></Link></td>
+                        <td><Link href={`/students/${a.studentId}`} className="player-cell"><Avatar name={a.student.name} small photo={photoUrl({ id: a.studentId, photoUpdatedAt: a.student.photoUpdatedAt })} /><b>{a.student.name}</b></Link></td>
                         <td>{formatDate(a.date)}</td>
                         <td>{a.batting}</td><td>{a.bowling}</td><td>{a.fielding}</td><td>{a.fitness}</td>
                         <td><b>{avg(a).toFixed(1)}</b></td>

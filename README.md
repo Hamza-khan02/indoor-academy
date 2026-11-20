@@ -76,6 +76,16 @@ They cannot see internal student notes, the "Review" status, other families, or 
 
 Until the app is online, the login link only works on the computer running it (the PIN window warns about this). After hosting, set the address in **Settings → Parent app** and send new PINs. Five wrong PINs lock that phone number for 15 minutes.
 
+## Student photos
+
+Each student can have a profile photo, shown on their profile, in the student list, dashboard, fees and performance pages, and in the parent app.
+
+- **Staff** (admin or coach): click the photo (or *Add photo* / *Change photo*) on the student's profile. *Remove* deletes it.
+- **Parents / students**: the same buttons on the child's card in the parent app. They can only change their own children's photos.
+- The profile shows when the photo was last changed and by whom ("Parent / student" or the staff member's name), so staff can remove an unsuitable photo.
+- Photos are cropped to a square and shrunk to about 20–40 KB in the browser before upload; the server accepts only real JPG, PNG or WebP files up to 300 KB. They are stored inside the database, so they move with `prisma/dev.db` and backups.
+- A photo is only visible to staff and to that student's own family.
+
 ## Roles
 
 | | Administrator | Coach |

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Activity, ArrowRight, CalendarDays, CircleDollarSign, ClipboardCheck, Dumbbell, Plus, ShieldAlert, Users } from 'lucide-react';
 import { db } from '@/lib/db';
+import { photoUrl } from '@/lib/photos';
 import { requireUser } from '@/lib/auth';
 import { ATTENDANCE_TARGET } from '@/lib/constants';
 import { addDays, addMonths, currentMonth, formatDate, formatTime, greeting, lastNDays, lastNMonths, todayISO, weekdayShort } from '@/lib/dates';
@@ -32,7 +33,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: { r
   const [students, batches, branches, dayStats, branchAtt, monthPayments, options] = await Promise.all([
     db.student.findMany({
       where: { status: { not: 'INACTIVE' } },
-      select: { id: true, name: true, ageGroup: true, playingRole: true, status: true, joinedOn: true, createdAt: true, branchId: true, batch: { select: { name: true } } },
+      select: { id: true, name: true, ageGroup: true, playingRole: true, status: true, joinedOn: true, createdAt: true, branchId: true, photoUpdatedAt: true, batch: { select: { name: true } } },
     }),
     db.batch.findMany({
       where: { active: true },
@@ -181,7 +182,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: { r
                   <tbody>
                     {recent.map((s) => (
                       <tr key={s.id}>
-                        <td><Link href={`/students/${s.id}`} className="player-cell"><Avatar name={s.name} /><div><b>{s.name}</b><small>{s.ageGroup}{s.playingRole ? ` · ${s.playingRole}` : ''}</small></div></Link></td>
+                        <td><Link href={`/students/${s.id}`} className="player-cell"><Avatar name={s.name} photo={photoUrl(s)} /><div><b>{s.name}</b><small>{s.ageGroup}{s.playingRole ? ` · ${s.playingRole}` : ''}</small></div></Link></td>
                         <td>{s.batch ? <span className="batch-tag">{s.batch.name}</span> : <small className="muted">Not assigned</small>}</td>
                         <td><AttendanceBar pct={recentAtt.get(s.id) ?? null} /></td>
                         <td><StatusPill status={s.status} /></td>
