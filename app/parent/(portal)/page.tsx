@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { CalendarDays, Clock3, FileText, MapPin, Trophy, UserRound } from 'lucide-react';
 import { db } from '@/lib/db';
 import { requireFamily } from '@/lib/family';
-import { ATTENDANCE_STATUS, DAYS, PAYMENT_METHODS, TOURNAMENT_STATUS } from '@/lib/constants';
+import { ATTENDANCE_STATUS, DAYS, PAYMENT_METHODS, SQUAD_ROLES, TOURNAMENT_STATUS } from '@/lib/constants';
+import { MatchRecord } from '@/components/MatchRecord';
 import { addDays, currentMonth, formatDate, formatLongDate, formatTime, monthLabel, todayISO, weekdayShort } from '@/lib/dates';
 import { inr, percent } from '@/lib/format';
 import { attended } from '@/lib/queries';
@@ -49,13 +50,22 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
       attendance: { orderBy: { date: 'desc' }, take: 60, select: { id: true, date: true, status: true } },
       payments: { orderBy: [{ paidOn: 'desc' }, { createdAt: 'desc' }], select: { id: true, amount: true, forMonth: true, paidOn: true, receiptNo: true, method: true } },
       assessments: { orderBy: [{ date: 'desc' }, { createdAt: 'desc' }], take: 20 },
+      matchStats: { include: { match: { select: { date: true, opponent: true, result: true } } } },
+      squads: {
+        where: { tournament: { status: { in: ['UPCOMING', 'ONGOING'] } } },
+        include: { tournament: { select: { id: true, name: true, startDate: true } } },
+      },
     },
   });
   const tournaments = await db.tournament.findMany({
-    where: { status: { in: ['UPCOMING', 'ONGOING'] }, OR: [{ ageGroup: null }, { ageGroup: student.ageGroup }] },
+    where: {
+      status: { in: ['UPCOMING', 'ONGOING'] },
+      OR: [{ ageGroup: null }, { ageGroup: student.ageGroup }, { squad: { some: { studentId: student.id } } }],
+    },
     orderBy: { startDate: 'asc' },
     take: 10,
   });
+  const selectedRole = new Map(student.squads.map((s) => [s.tournamentId, s.role]));
 
   const batchDays = student.batch?.days.split(',') ?? [];
   const next = student.batch?.active ? nextSession(batchDays, today) : null;
@@ -91,6 +101,16 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
         </div>
         {inactive && <StatusPill status="INACTIVE" labels={{ INACTIVE: 'Not currently enrolled' }} />}
       </section>
+
+      {student.squads.map((s) => (
+        <div key={s.tournamentId} className="selected-banner">
+          <Trophy size={20} />
+          <div>
+            <b>{student.name.split(' ')[0]} has been selected for {s.tournament.name}!</b>
+            <span>{s.role !== 'PLAYER' ? `${SQUAD_ROLES[s.role]} · ` : ''}Starts {formatDate(s.tournament.startDate)}</span>
+          </div>
+        </div>
+      ))}
 
       <div className="portal-grid">
         <Panel title="Training schedule" subtitle={student.batch ? `${student.batch.name} · ${student.batch.ageGroup}` : undefined}>
@@ -195,7 +215,20 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
           )}
         </Panel>
 
-        <Panel title="Upcoming tournaments" subtitle={`For ${student.ageGroup} and open events`} className="portal-wide">
+        <Panel title="Match record" subtitle="Career stats from the academy's match scorecards" className="portal-wide">
+          <MatchRecord rows={student.matchStats} />
+        </Panel>
+
+        <Panel title="Health & emergency" subtitle="To change these details, please contact the academy">
+          <dl className="details">
+            <dt>Blood group</dt><dd>{student.bloodGroup ?? <span className="muted">Not known</span>}</dd>
+            <dt>Emergency</dt>
+            <dd>{student.emergencyName || student.emergencyPhone ? `${student.emergencyName ?? 'Contact'}${student.emergencyPhone ? ` · ${student.emergencyPhone}` : ''}` : <span className="muted">Not added</span>}</dd>
+            <dt>Medical</dt><dd>{student.medicalNotes ?? <span className="muted">Nothing noted</span>}</dd>
+          </dl>
+        </Panel>
+
+        <Panel title="Upcoming tournaments" subtitle={`For ${student.ageGroup} and open events`}>
           {tournaments.length === 0 ? <Empty title="No upcoming tournaments right now" /> : (
             <ul className="tournament-list">
               {tournaments.map((t) => (
@@ -208,6 +241,7 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
                       {t.venue ? ` · ${t.venue}` : ''}{t.ageGroup ? ` · ${t.ageGroup}` : ''}
                     </small>
                   </div>
+                  {selectedRole.has(t.id) && <span className="selected-tag">✓ Selected{selectedRole.get(t.id) !== 'PLAYER' ? ` · ${SQUAD_ROLES[selectedRole.get(t.id)!]}` : ''}</span>}
                   <StatusPill status={t.status} labels={TOURNAMENT_STATUS} />
                 </li>
               ))}

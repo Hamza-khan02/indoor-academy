@@ -41,6 +41,16 @@ export default async function PerformancePage() {
   const leaders = withAtt.filter((s) => s.pct !== null).sort((a, b) => b.pct! - a.pct!).slice(0, 5);
   const attention = withAtt.filter((s) => s.status === 'REVIEW' || (s.pct !== null && s.pct < LOW_ATTENDANCE));
 
+  // Match leaders (all recorded matches, current students only).
+  const activeWhere = { student: { status: { not: 'INACTIVE' } } };
+  const [runAgg, wicketAgg] = await Promise.all([
+    db.playerMatchStat.groupBy({ by: ['studentId'], where: activeWhere, _sum: { runs: true }, _count: { _all: true }, orderBy: { _sum: { runs: 'desc' } }, take: 5 }),
+    db.playerMatchStat.groupBy({ by: ['studentId'], where: activeWhere, _sum: { wickets: true }, _count: { _all: true }, orderBy: { _sum: { wickets: 'desc' } }, take: 5 }),
+  ]);
+  const byId = new Map(students.map((s) => [s.id, s]));
+  const topRuns = runAgg.filter((r) => (r._sum.runs ?? 0) > 0 && byId.has(r.studentId));
+  const topWickets = wicketAgg.filter((r) => (r._sum.wickets ?? 0) > 0 && byId.has(r.studentId));
+
   const addButton = students.length > 0 && (
     <FormModal title="New assessment" eyebrow="PERFORMANCE" trigger={<><Plus size={17} /> New assessment</>} action={addAssessment} submitLabel="Save assessment">
       <AssessmentFields students={students} />
@@ -80,6 +90,29 @@ export default async function PerformancePage() {
                     <li key={s.id}><Link href={`/students/${s.id}`}><Avatar name={s.name} small photo={photoUrl(s)} /><span>{s.name}</span><AttendanceBar pct={s.pct} /></Link></li>
                   ))}
                 </ul>
+              )}
+            </Panel>
+          </div>
+
+          <div className="two-col spaced-top">
+            <Panel title="Top run scorers" subtitle="All recorded matches" action={<Link className="text-btn" href="/matches">Matches</Link>}>
+              {topRuns.length === 0 ? <Empty title="No match runs yet" /> : (
+                <ol className="rank-list">
+                  {topRuns.map((r) => {
+                    const s = byId.get(r.studentId)!;
+                    return <li key={r.studentId}><Link href={`/students/${s.id}`}><Avatar name={s.name} small photo={photoUrl(s)} /><span>{s.name} <small className="muted">{r._count._all} matches</small></span><b>{r._sum.runs}</b></Link></li>;
+                  })}
+                </ol>
+              )}
+            </Panel>
+            <Panel title="Top wicket takers" subtitle="All recorded matches">
+              {topWickets.length === 0 ? <Empty title="No match wickets yet" /> : (
+                <ol className="rank-list">
+                  {topWickets.map((r) => {
+                    const s = byId.get(r.studentId)!;
+                    return <li key={r.studentId}><Link href={`/students/${s.id}`}><Avatar name={s.name} small photo={photoUrl(s)} /><span>{s.name} <small className="muted">{r._count._all} matches</small></span><b>{r._sum.wickets}</b></Link></li>;
+                  })}
+                </ol>
               )}
             </Panel>
           </div>

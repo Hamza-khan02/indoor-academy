@@ -21,8 +21,8 @@ async function build(type: string) {
   if (type === 'students') {
     const students = await db.student.findMany({ orderBy: { name: 'asc' }, include: { branch: true, batch: true } });
     return csv(
-      ['Name', 'Age group', 'Playing role', 'Date of birth', 'Branch', 'Batch', 'Guardian', 'Guardian phone', 'Status', 'Joined on', 'Notes'],
-      students.map((s) => [s.name, s.ageGroup, s.playingRole, s.dob, s.branch.name, s.batch?.name, s.guardianName, s.guardianPhone, STUDENT_STATUS[s.status], s.joinedOn, s.notes]),
+      ['Name', 'Age group', 'Playing role', 'Date of birth', 'Branch', 'Batch', 'Guardian', 'Guardian phone', 'Status', 'Joined on', 'Notes', 'Blood group', 'Emergency contact', 'Emergency phone', 'Medical notes'],
+      students.map((s) => [s.name, s.ageGroup, s.playingRole, s.dob, s.branch.name, s.batch?.name, s.guardianName, s.guardianPhone, STUDENT_STATUS[s.status], s.joinedOn, s.notes, s.bloodGroup, s.emergencyName, s.emergencyPhone, s.medicalNotes]),
     );
   }
   if (type === 'payments') {

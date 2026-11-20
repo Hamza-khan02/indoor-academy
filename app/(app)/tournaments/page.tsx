@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { CalendarDays, MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
@@ -40,7 +41,7 @@ function TournamentFields({ t }: { t?: Tournament }) {
 export default async function TournamentsPage() {
   const user = await requireUser();
   const isAdmin = user.role === 'ADMIN';
-  const tournaments = await db.tournament.findMany({ orderBy: { startDate: 'desc' } });
+  const tournaments = await db.tournament.findMany({ orderBy: { startDate: 'desc' }, include: { _count: { select: { squad: true, matches: true } } } });
   const order = ['ONGOING', 'UPCOMING', 'COMPLETED'];
   const groups = order.map((status) => ({
     status,
@@ -66,7 +67,7 @@ export default async function TournamentsPage() {
               {g.items.map((t) => (
                 <article key={t.id} className="panel padded">
                   <div className="panel-head">
-                    <div><h3>{t.name}</h3>{t.ageGroup && <p>{t.ageGroup}</p>}</div>
+                    <div><h3><Link href={`/tournaments/${t.id}`}>{t.name}</Link></h3>{t.ageGroup && <p>{t.ageGroup}</p>}</div>
                     <StatusPill status={t.status} labels={TOURNAMENT_STATUS} />
                   </div>
                   <ul className="meta-list">
@@ -75,6 +76,7 @@ export default async function TournamentsPage() {
                   </ul>
                   {t.result && <p className="card-note">{t.result}</p>}
                   <div className="row-actions end">
+                    <Link className="text-btn squad-link" href={`/tournaments/${t.id}`}>Squad ({t._count.squad}){t._count.matches ? ` · ${t._count.matches} matches` : ""}</Link>
                     <FormModal title={`Edit ${t.name}`} trigger={<Pencil size={15} />} triggerClassName="icon-action" triggerLabel="Edit" action={updateTournament.bind(null, t.id)}>
                       <TournamentFields t={t} />
                     </FormModal>

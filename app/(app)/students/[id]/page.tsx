@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, Pencil, Plus, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
-import { ATTENDANCE_STATUS, PAYMENT_METHODS } from '@/lib/constants';
+import { ATTENDANCE_STATUS, PAYMENT_METHODS, SQUAD_ROLES } from '@/lib/constants';
+import { MatchRecord } from '@/components/MatchRecord';
 import { addDays, ageFrom, currentMonth, formatDate, monthLabel, todayISO } from '@/lib/dates';
 import { inr, percent } from '@/lib/format';
 import { attended, formOptions } from '@/lib/queries';
@@ -36,6 +37,8 @@ export default async function StudentPage({ params }: { params: { id: string } }
       attendance: { orderBy: { date: 'desc' }, take: 60 },
       payments: { orderBy: [{ paidOn: 'desc' }, { createdAt: 'desc' }] },
       assessments: { orderBy: [{ date: 'desc' }, { createdAt: 'desc' }] },
+      matchStats: { include: { match: { select: { date: true, opponent: true, result: true } } } },
+      squads: { where: { tournament: { status: { in: ['UPCOMING', 'ONGOING'] } } }, include: { tournament: { select: { name: true } } } },
       reminders: { orderBy: { createdAt: 'desc' }, take: 5 },
     },
   });
@@ -117,7 +120,19 @@ export default async function StudentPage({ params }: { params: { id: string } }
             <dt>Date of birth</dt><dd>{formatDate(student.dob)}</dd>
             <dt>Joined</dt><dd>{formatDate(student.joinedOn)}</dd>
             <dt>Branch</dt><dd>{student.branch.name}</dd>
-            <dt>Notes</dt><dd>{student.notes ?? '—'}</dd>
+            <dt>Internal notes</dt><dd>{student.notes ?? '—'}</dd>
+            <dt>Blood group</dt><dd>{student.bloodGroup ?? <span className="muted">Not known</span>}</dd>
+            <dt>Emergency</dt>
+            <dd>
+              {student.emergencyName || student.emergencyPhone ? (
+                <>
+                  {student.emergencyName ?? 'Contact'}
+                  {student.emergencyPhone && <> · <a href={`tel:${student.emergencyPhone.replace(/\s/g, '')}`}>{student.emergencyPhone}</a></>}
+                </>
+              ) : <span className="muted">Not added</span>}
+            </dd>
+            <dt>Medical</dt>
+            <dd>{student.medicalNotes ? <span className="medical-note">⚕ {student.medicalNotes}</span> : <span className="muted">Nothing noted</span>}</dd>
             {isAdmin && (
               <>
                 <dt>Parent app</dt>
@@ -190,6 +205,14 @@ export default async function StudentPage({ params }: { params: { id: string } }
           )}
         </Panel>
       </div>
+
+      <Panel
+        title="Match record"
+        subtitle={student.squads.length ? `Tournament squads: ${student.squads.map((s) => `${s.tournament.name}${s.role !== 'PLAYER' ? ` (${SQUAD_ROLES[s.role]})` : ''}`).join(', ')}` : 'Career stats from match scorecards'}
+        className="spaced-bottom"
+      >
+        <MatchRecord rows={student.matchStats} linkMatches />
+      </Panel>
 
       <div className="two-col">
         {isAdmin && (

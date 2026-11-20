@@ -86,6 +86,23 @@ Each student can have a profile photo, shown on their profile, in the student li
 - Photos are cropped to a square and shrunk to about 20–40 KB in the browser before upload; the server accepts only real JPG, PNG or WebP files up to 300 KB. They are stored inside the database, so they move with `prisma/dev.db` and backups.
 - A photo is only visible to staff and to that student's own family.
 
+## Matches & career stats
+
+**Matches** (left menu) records every match the academy plays: opponent, date, type (practice, friendly, tournament, league), overs, scores and result.
+
+- Open a match to fill in the **scorecard** for our players: how they batted (did not bat / out / not out), runs, balls, 4s, 6s; bowling overs (e.g. `3.4` = 3 overs 4 balls), maidens, runs, wickets; catches, stumpings and run outs. Wrong combinations (e.g. 4s and 6s adding to more than the runs) are rejected with a clear message.
+- Each student's **career record** is worked out automatically: matches, runs, highest score, average, strike rate, 50s/100s, overs, wickets, best bowling, economy and fielding. It shows on the student's profile and in the parent app.
+- **Performance** lists the top run scorers and wicket takers.
+- Admins and coaches can add matches and scorecards; only admins can delete a match.
+
+## Tournament squads
+
+Open a tournament (title or *Squad* link) to tick the selected players and give each a role (Captain, Vice-captain, Wicket-keeper, Player, Reserve; one captain and one vice-captain). The list starts with the tournament's age group; tick "Show all age groups" to pick others. In the parent app, a selected child sees a "has been selected" banner and a *Selected* tag on the tournament. A match linked to a tournament can add the whole squad to its scorecard in one click.
+
+## Health & emergency details
+
+Each student can have a blood group, an emergency contact (name and phone) and medical notes (allergies, asthma, injuries). They are in the student form, on the profile, in the students CSV export, and shown read-only to the family in the parent app. Students with medical notes get a ⚕ mark on the attendance sheet so coaches can see them during training. The separate *Internal notes* field stays staff-only.
+
 ## Roles
 
 | | Administrator | Coach |

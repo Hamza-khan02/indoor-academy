@@ -9,6 +9,11 @@ export const PAYMENT_METHODS: Record<string, string> = { CASH: 'Cash', UPI: 'UPI
 export const TOURNAMENT_STATUS: Record<string, string> = { UPCOMING: 'Upcoming', ONGOING: 'Ongoing', COMPLETED: 'Completed' };
 export const USER_ROLES: Record<string, string> = { ADMIN: 'Administrator', COACH: 'Coach' };
 
+export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+export const MATCH_TYPES: Record<string, string> = { PRACTICE: 'Practice match', FRIENDLY: 'Friendly', TOURNAMENT: 'Tournament', LEAGUE: 'League' };
+export const MATCH_RESULTS: Record<string, string> = { WON: 'Won', LOST: 'Lost', DRAW: 'Draw', TIE: 'Tie', NO_RESULT: 'No result' };
+export const SQUAD_ROLES: Record<string, string> = { CAPTAIN: 'Captain', VICE_CAPTAIN: 'Vice-captain', WICKET_KEEPER: 'Wicket-keeper', PLAYER: 'Player', RESERVE: 'Reserve' };
+
 /** Attendance goal shown on the dashboard chart. */
 export const ATTENDANCE_TARGET = 90;
 /** Players under this attendance % (last 30 days) are flagged. */

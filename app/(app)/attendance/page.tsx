@@ -23,7 +23,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: {
       students: {
         where: { status: { not: 'INACTIVE' } },
         orderBy: { name: 'asc' },
-        select: { id: true, name: true, ageGroup: true, playingRole: true, guardianName: true, guardianPhone: true },
+        select: { id: true, name: true, ageGroup: true, playingRole: true, guardianName: true, guardianPhone: true, medicalNotes: true },
       },
     },
   });
@@ -86,6 +86,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: {
                     id: s.id,
                     name: s.name,
                     detail: [s.ageGroup, s.playingRole].filter(Boolean).join(' · '),
+                    medical: s.medicalNotes,
                     status: statusOf.get(s.id) ?? '',
                     noticeUrl: absenceNoticeUrl(settings, { ...s, batchName: selected.name }, day),
                     notified: notified.has(s.id),

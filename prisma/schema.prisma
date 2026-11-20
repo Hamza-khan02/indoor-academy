@@ -78,6 +78,11 @@ model Student {
   status        String       @default("ACTIVE") // ACTIVE | REVIEW | INACTIVE
   joinedOn      String // YYYY-MM-DD
   notes         String?
+  // Health & emergency (visible to staff and the student's own family)
+  bloodGroup     String? // A+, A-, B+, B-, AB+, AB-, O+, O-
+  emergencyName  String?
+  emergencyPhone String?
+  medicalNotes   String? // allergies, asthma, injuries...
   branchId      String
   branch        Branch       @relation(fields: [branchId], references: [id], onDelete: Restrict)
   batchId       String?
@@ -86,6 +91,8 @@ model Student {
   payments      FeePayment[]
   assessments   Assessment[]
   reminders     Reminder[]
+  matchStats    PlayerMatchStat[]
+  squads        TournamentSquad[]
   photo         StudentPhoto?
   // Set when a profile photo is saved; used as the image's cache-busting version. Null = no photo.
   photoUpdatedAt DateTime?
@@ -198,5 +205,66 @@ model Tournament {
   ageGroup  String?
   status    String   @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
   result    String?
+  squad     TournamentSquad[]
+  matches   Match[]
   createdAt DateTime @default(now())
+}
+
+// Students selected for a tournament.
+model TournamentSquad {
+  tournamentId String
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  role         String     @default("PLAYER") // CAPTAIN | VICE_CAPTAIN | WICKET_KEEPER | PLAYER | RESERVE
+  addedAt      DateTime   @default(now())
+
+  @@id([tournamentId, studentId])
+  @@index([studentId])
+}
+
+// A match the academy played (practice, friendly, tournament or league).
+model Match {
+  id            String            @id @default(cuid())
+  date          String // YYYY-MM-DD
+  opponent      String
+  venue         String?
+  matchType     String            @default("FRIENDLY") // PRACTICE | FRIENDLY | TOURNAMENT | LEAGUE
+  overs         Int? // overs per side
+  result        String? // WON | LOST | DRAW | TIE | NO_RESULT
+  ourScore      String? // free text, e.g. "145/6 (20)"
+  opponentScore String?
+  notes         String?
+  tournamentId  String?
+  tournament    Tournament?       @relation(fields: [tournamentId], references: [id], onDelete: SetNull)
+  stats         PlayerMatchStat[]
+  createdBy     String?
+  createdAt     DateTime          @default(now())
+
+  @@index([date])
+}
+
+// One player's batting, bowling and fielding in one match.
+model PlayerMatchStat {
+  id           String  @id @default(cuid())
+  matchId      String
+  match        Match   @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  studentId    String
+  student      Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batted       Boolean @default(false)
+  notOut       Boolean @default(false)
+  runs         Int     @default(0)
+  balls        Int     @default(0)
+  fours        Int     @default(0)
+  sixes        Int     @default(0)
+  ballsBowled  Int     @default(0) // overs stored as balls: 3.4 overs = 22
+  maidens      Int     @default(0)
+  runsConceded Int     @default(0)
+  wickets      Int     @default(0)
+  catches      Int     @default(0)
+  stumpings    Int     @default(0)
+  runOuts      Int     @default(0)
+
+  @@unique([matchId, studentId])
+  @@index([studentId])
 }

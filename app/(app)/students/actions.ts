@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { actionAdmin, actionUser } from '@/lib/auth';
-import { AGE_GROUPS, PLAYING_ROLES, STUDENT_STATUS } from '@/lib/constants';
+import { AGE_GROUPS, BLOOD_GROUPS, PLAYING_ROLES, STUDENT_STATUS } from '@/lib/constants';
 import { todayISO } from '@/lib/dates';
 import { FormError, date, oneOf, phone, run, text } from '@/lib/form';
 import { phoneKey } from '@/lib/family';
@@ -34,6 +34,10 @@ async function parseStudent(fd: FormData) {
     status: oneOf(fd, 'status', Object.keys(STUDENT_STATUS), { label: 'Status' }) ?? 'ACTIVE',
     joinedOn: date(fd, 'joinedOn', { label: 'Joining date' }) ?? todayISO(),
     notes: text(fd, 'notes', { label: 'Notes', max: 500 }),
+    bloodGroup: oneOf(fd, 'bloodGroup', BLOOD_GROUPS, { label: 'Blood group' }),
+    emergencyName: text(fd, 'emergencyName', { label: 'Emergency contact name', max: 80 }),
+    emergencyPhone: phone(fd, 'emergencyPhone', { label: 'Emergency contact phone' }),
+    medicalNotes: text(fd, 'medicalNotes', { label: 'Medical notes', max: 500 }),
     branchId,
     batchId,
   };

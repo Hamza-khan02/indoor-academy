@@ -6,7 +6,7 @@ import type { ActionResult } from '@/lib/form';
 import { useToast } from '@/components/Toast';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 
-type Row = { id: string; name: string; detail: string; status: string; noticeUrl: string | null; notified: boolean };
+type Row = { id: string; name: string; detail: string; status: string; noticeUrl: string | null; notified: boolean; medical: string | null };
 const OPTIONS = [
   ['PRESENT', 'P', 'Present'],
   ['LATE', 'L', 'Late'],
@@ -50,7 +50,7 @@ export function AttendanceSheet({ students, day, action }: { students: Row[]; da
       <ul className="sheet">
         {students.map((s) => (
           <li key={s.id}>
-            <div className="stack"><b>{s.name}</b><small className="muted">{s.detail}</small></div>
+            <div className="stack"><b>{s.name}{s.medical && <span className="medical-flag" title={`Medical: ${s.medical}`}> ⚕</span>}</b><small className="muted">{s.detail}</small>{s.medical && <small className="medical-note">{s.medical}</small>}</div>
             {marks[s.id] === 'ABSENT' && (
               <div className="wa-cell end">
                 {s.notified && <small className="muted">Parent notified</small>}
