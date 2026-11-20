@@ -1,0 +1,170 @@
+// INDOOR ACADEMY database schema.
+// SQLite is used for local development. To move to PostgreSQL later, change
+// `provider` below and DATABASE_URL in .env, then run `npx prisma migrate dev`.
+//
+// Dates that are "calendar days" (attendance, payments, DOB) are stored as
+// 'YYYY-MM-DD' strings in India time so they never shift across timezones.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("COACH") // ADMIN | COACH
+  createdAt    DateTime @default(now())
+}
+
+model Branch {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  address   String?
+  createdAt DateTime  @default(now())
+  students  Student[]
+  batches   Batch[]
+  coaches   Coach[]
+}
+
+model Coach {
+  id             String   @id @default(cuid())
+  name           String
+  phone          String?
+  email          String?
+  specialization String? // Batting, Bowling, Fielding, Fitness, Head coach...
+  active         Boolean  @default(true)
+  branchId       String?
+  branch         Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  batches        Batch[]
+  createdAt      DateTime @default(now())
+}
+
+model Batch {
+  id         String       @id @default(cuid())
+  name       String
+  ageGroup   String // U-10, U-12, ... Open
+  days       String // comma separated: "Mon,Wed,Fri"
+  startTime  String // "16:00"
+  endTime    String // "17:30"
+  venue      String? // "Net 01", "Main Pitch"
+  monthlyFee Int          @default(0) // rupees
+  active     Boolean      @default(true)
+  branchId   String
+  branch     Branch       @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  coachId    String?
+  coach      Coach?       @relation(fields: [coachId], references: [id], onDelete: SetNull)
+  students   Student[]
+  attendance Attendance[]
+  createdAt  DateTime     @default(now())
+}
+
+model Student {
+  id            String       @id @default(cuid())
+  name          String
+  dob           String? // YYYY-MM-DD
+  ageGroup      String
+  playingRole   String? // Batter, Bowler, All-rounder, WK-Batter
+  guardianName  String?
+  guardianPhone String
+  status        String       @default("ACTIVE") // ACTIVE | REVIEW | INACTIVE
+  joinedOn      String // YYYY-MM-DD
+  notes         String?
+  branchId      String
+  branch        Branch       @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  batchId       String?
+  batch         Batch?       @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  attendance    Attendance[]
+  payments      FeePayment[]
+  assessments   Assessment[]
+  reminders     Reminder[]
+  createdAt     DateTime     @default(now())
+
+  @@index([branchId])
+  @@index([batchId])
+}
+
+// A WhatsApp message opened for a parent (fee reminder or absence notice).
+// Logged when the button is clicked; WhatsApp does not tell us whether it was actually sent.
+model Reminder {
+  id        String   @id @default(cuid())
+  kind      String // FEE | ABSENT
+  ref       String // YYYY-MM for FEE, YYYY-MM-DD for ABSENT
+  sentBy    String?
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([studentId, kind, ref])
+  @@index([kind, ref])
+}
+
+// Simple key/value app settings (academy name, WhatsApp message templates).
+model Setting {
+  key   String @id
+  value String
+}
+
+model Attendance {
+  id        String   @id @default(cuid())
+  date      String // YYYY-MM-DD
+  status    String // PRESENT | ABSENT | LATE
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batchId   String?
+  batch     Batch?   @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  markedBy  String?
+  createdAt DateTime @default(now())
+
+  @@unique([studentId, date])
+  @@index([date])
+}
+
+model FeePayment {
+  id        String   @id @default(cuid())
+  amount    Int // rupees
+  forMonth  String // YYYY-MM the fee is for
+  paidOn    String // YYYY-MM-DD
+  method    String   @default("CASH") // CASH | UPI | CARD | BANK
+  reference String?
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([forMonth])
+  @@index([paidOn])
+}
+
+model Assessment {
+  id        String   @id @default(cuid())
+  date      String // YYYY-MM-DD
+  batting   Int // 1-10
+  bowling   Int // 1-10
+  fielding  Int // 1-10
+  fitness   Int // 1-10
+  notes     String?
+  coachName String?
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+}
+
+model Tournament {
+  id        String   @id @default(cuid())
+  name      String
+  startDate String // YYYY-MM-DD
+  endDate   String?
+  venue     String?
+  ageGroup  String?
+  status    String   @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
+  result    String?
+  createdAt DateTime @default(now())
+}
