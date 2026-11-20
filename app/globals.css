@@ -112,7 +112,7 @@ footer { display:flex; justify-content:space-between; color:#55555f; font-size:8
 .stat-foot { display:flex; align-items:center; gap:7px; color:#777781; font-size:10px; position:relative; z-index:1; max-width:75% }
 .trend { display:inline-flex; align-items:center; gap:2px; font-size:10px; font-weight:600; white-space:nowrap }
 .positive { color:#4ade80 } .negative { color:#f87171 } .neutral { color:#a0a0aa }
-.spark { position:absolute; right:16px; bottom:15px; height:31px; width:67px; display:flex; align-items:end; gap:4px; opacity:.5 }
+.spark { position:absolute; right:16px; bottom:15px; height:31px; width:67px; display:flex; align-items:flex-end; gap:4px; opacity:.5 }
 .spark i { width:5px; background:#ef4444; border-radius:2px 2px 0 0 }
 .spark.green i { background:#4ade80 } .spark.blue i { background:#60a5fa } .spark.amber i { background:#fbbf24 }
 
@@ -326,6 +326,120 @@ a.player-cell:hover b { color:#ff8a8a }
 .account-row .stack { flex:1 }
 .scrim { display:none }
 
+/* ---------- Fee receipt (light, printable) ---------- */
+.spaced-bottom { margin-bottom:15px }
+.receipt-page { min-height:100vh; padding:24px 16px 48px; display:flex; flex-direction:column; align-items:center; gap:16px }
+.receipt-toolbar { width:min(760px,100%); display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
+.receipt-toolbar-actions { display:flex; gap:8px; flex-wrap:wrap }
+.receipt-toolbar .wa-btn { height:37px; padding:0 13px; font-size:11px }
+.receipt { width:min(760px,100%); background:#fff; color:#1c1c22; border-radius:10px; padding:36px 40px; box-shadow:0 20px 60px #0007; font-size:13px; line-height:1.5 }
+.receipt-head { display:flex; justify-content:space-between; gap:24px; padding-bottom:20px; border-bottom:2px solid #dc2626; flex-wrap:wrap }
+.receipt-brand { display:flex; gap:14px; align-items:flex-start }
+.receipt-mark { width:46px; height:46px; border-radius:10px; background:#dc2626; color:#fff; display:grid; place-items:center; font:700 17px 'Space Grotesk'; flex-shrink:0 }
+.receipt-brand h1 { font:700 20px 'Space Grotesk'; margin:0 0 4px; letter-spacing:-.3px }
+.receipt-brand p { margin:0; color:#5b5b66; font-size:12px }
+.receipt-meta { text-align:right }
+.receipt-meta h2 { font:700 15px 'Space Grotesk'; letter-spacing:2px; color:#dc2626; margin:0 0 8px }
+.receipt-meta dl, .receipt-party dl { display:grid; grid-template-columns:auto auto; gap:3px 12px; margin:0; justify-content:end }
+.receipt-meta dt, .receipt-party dt { color:#6b6b76 }
+.receipt-meta dd, .receipt-party dd { margin:0; font-weight:600 }
+.receipt-party { padding:18px 0 }
+.receipt-party p { margin:0 0 10px }
+.receipt-party dl { justify-content:start }
+.receipt-table { width:100%; border-collapse:collapse; white-space:normal; margin:4px 0 14px }
+.receipt-table th { text-align:left; font-size:11px; letter-spacing:.6px; color:#6b6b76; background:#f4f4f6; padding:9px 12px; text-transform:uppercase }
+.receipt-table td { border-top:1px solid #e6e6ea; padding:11px 12px; font-size:13px; color:#1c1c22 }
+.receipt-table th:last-child, .receipt-table td:last-child { text-align:right; width:150px }
+.receipt-table th:first-child, .receipt-table td:first-child { padding-left:12px }
+.receipt-table tfoot td { font-weight:700; border-top:2px solid #1c1c22; font-size:14px }
+.receipt-words, .receipt-method { margin:0 0 6px }
+.receipt-words span, .receipt-method span { color:#6b6b76 }
+.receipt-words { font-weight:600 }
+.receipt-foot { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-top:36px; flex-wrap:wrap }
+.receipt-note { margin:0; color:#6b6b76; font-size:11px; max-width:360px }
+.receipt-sign { text-align:center; font-size:11px; color:#5b5b66; min-width:200px }
+.sign-line { border-top:1px solid #1c1c22; margin-bottom:6px }
+@media print {
+  @page { margin:12mm }
+  body { background:#fff }
+  .receipt-toolbar { display:none }
+  .receipt-page { padding:0; min-height:0 }
+  .receipt { box-shadow:none; border-radius:0; padding:0; width:100% }
+  .receipt-mark, .receipt-table th { -webkit-print-color-adjust:exact; print-color-adjust:exact }
+}
+
+/* ---------- Parent app ---------- */
+.login-alt { margin:18px 0 0; text-align:center; font-size:11px; color:#85858f }
+.login-alt a { color:#f16b6b; font-weight:600 }
+.portal { min-height:100vh; display:flex; flex-direction:column }
+.portal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid #242429; background:#101014; position:sticky; top:0; z-index:10 }
+.portal-brand { padding:0; border:0 }
+.portal-content { width:min(1100px,100%); margin:0 auto; padding:20px 16px 30px; flex:1 }
+.portal-footer { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; padding:16px; color:#6c6c75; font-size:10px; border-top:1px solid #1f1f24 }
+.portal-footer a { display:inline-flex; align-items:center; gap:5px; color:#a0a0aa }
+.child-tabs { display:flex; gap:6px; overflow-x:auto; margin-bottom:14px; padding-bottom:2px }
+.child-tabs a { white-space:nowrap; padding:8px 14px; border-radius:20px; border:1px solid #303038; background:#17171b; font-size:12px; color:#c3c3cb }
+.child-tabs a.on { background:#341719; border-color:#ef4444; color:#ff8a8a; font-weight:600 }
+.portal-hero { display:flex; align-items:center; gap:14px; margin-bottom:14px; flex-wrap:wrap }
+.portal-hero .avatar { width:52px; height:52px; font-size:16px; border-radius:14px }
+.portal-hero-copy { flex:1; min-width:200px }
+.portal-hero h1 { font:600 24px 'Space Grotesk'; margin:0 0 4px; letter-spacing:-.5px }
+.portal-hero p { margin:0; color:#85858f; font-size:12px }
+.portal-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px }
+.portal-grid .portal-wide { grid-column:1 / -1 }
+.next-session { display:flex; align-items:center; gap:12px; background:#1a1a20; border:1px solid #2a2a31; border-radius:10px; padding:12px; margin-bottom:14px; color:#f87171 }
+.next-session small { display:block; color:#85858f; font-size:9px; letter-spacing:1.2px; margin-bottom:3px }
+.next-session b { color:#f4f4f5; font-size:13px }
+.legend { display:flex; gap:12px; font-size:10px; margin:10px 0 0 }
+.fee-status { border-radius:10px; padding:12px 14px; margin-bottom:12px; display:flex; flex-direction:column; gap:3px }
+.fee-status small { font-size:9px; letter-spacing:1.2px; opacity:.8 }
+.fee-status b { font:600 18px 'Space Grotesk' }
+.fee-status span { font-size:11px; opacity:.85 }
+.fee-status.due { background:#2a1719; border:1px solid #4a2a2e; color:#fca5a5 }
+.fee-status.paid { background:#12261b; border:1px solid #1f5a3a; color:#86efac }
+.receipt-link { text-decoration:none }
+.rating-head { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; font-size:11px }
+.rating-head small { display:block; color:#85858f; font-size:9px; letter-spacing:1.2px; margin-bottom:3px }
+.rating-head b { font:600 28px 'Space Grotesk' }
+.rating-head b span { font-size:14px; color:#85858f }
+.skill-bars { list-style:none; margin:0 0 12px; padding:0; display:grid; gap:9px }
+.skill-bars li { display:grid; grid-template-columns:70px 1fr 24px; align-items:center; gap:10px; font-size:12px }
+.skill-bars .progress { margin-top:0; height:7px }
+.skill-bars b { text-align:right }
+.coach-note { background:#1a1a20; border-left:3px solid #ef4444; padding:10px 12px; border-radius:0 8px 8px 0; margin:0 0 12px; font-size:12px; line-height:1.6; color:#d4d4d8 }
+.history summary { cursor:pointer; color:#c3c3cb; font-size:11px }
+.history ul { list-style:none; padding:0; margin:10px 0 0; display:grid; gap:10px }
+.history li { border-top:1px solid #25252b; padding-top:9px; font-size:11px }
+.history-row { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap }
+.history li p { margin:5px 0 0; line-height:1.5 }
+.tournament-list { list-style:none; margin:0; padding:0 }
+.tournament-list li { display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid #25252b; font-size:12px; color:#fbbf24 }
+.tournament-list li:first-child { border-top:0 }
+.tournament-list .stack { flex:1; color:#f4f4f5 }
+.portal-receipt { min-height:0 }
+.pin-box { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px }
+.pin-box div { background:#101014; border:1px solid #303038; border-radius:10px; padding:12px }
+.pin-box small { display:block; color:#85858f; font-size:9px; letter-spacing:1.2px; margin-bottom:4px }
+.pin-box b { font:600 16px 'Space Grotesk' }
+.pin-box .pin { font-size:26px; letter-spacing:6px; color:#4ade80 }
+.form-error.warn { background:#2a2214; border-color:#5c4520; color:#fcd34d; display:flex; gap:8px; align-items:flex-start; line-height:1.5 }
+.wa-btn.big { height:37px; padding:0 13px; font-size:11px }
+.parent-access { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap }
+.icon-action.wide { width:auto; padding:0 8px; gap:5px; display:inline-flex; font-size:10px }
+.batch-tag.off { color:#f87171; border-color:#4a2a2e }
+.portal-address { font-size:11px; color:#a0a0aa; margin:0 0 10px }
+.portal-address b { color:#e4e4e7; word-break:break-all }
+.small-note { font-size:11px; margin:0 }
+@media print {
+  .portal-header, .portal-footer { display:none }
+  .portal-content { padding:0 }
+}
+@media (max-width:760px) {
+  .portal-grid { grid-template-columns:1fr }
+  .portal-header { padding:12px 14px }
+  .portal-header .secondary-btn { padding:0 10px }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width:1200px) {
   .content { padding:27px 24px }
@@ -373,4 +487,7 @@ a.player-cell:hover b { color:#ff8a8a }
   .crumb { font-size:11px }
   .bar-list li { grid-template-columns:1fr 1.4fr auto }
   .bar-list li > small { display:none }
+  .receipt { padding:22px 18px }
+  .receipt-meta { text-align:left }
+  .receipt-meta dl { justify-content:start }
 }

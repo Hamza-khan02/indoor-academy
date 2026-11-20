@@ -29,6 +29,7 @@ export function AssessmentFields({ studentId, students }: { studentId?: string; 
         ))}
       </div>
       <label>Coach notes<textarea name="notes" rows={3} maxLength={500} placeholder="Strengths, what to work on next…" /></label>
+      <p className="form-hint">Parents and the student can see these scores and notes in the parent app.</p>
     </>
   );
 }

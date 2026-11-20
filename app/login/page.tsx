@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { LoginForm } from './LoginForm';
@@ -23,6 +24,7 @@ export default async function LoginPage({ searchParams }: { searchParams: { next
         <h1>Log in</h1>
         <p className="login-sub">Use the account given to you by the academy administrator.</p>
         <LoginForm next={next} />
+        <p className="login-alt">Parent or student? <Link href="/parent/login">Parent app login</Link></p>
       </section>
     </main>
   );

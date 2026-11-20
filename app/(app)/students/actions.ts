@@ -6,6 +6,7 @@ import { actionAdmin, actionUser } from '@/lib/auth';
 import { AGE_GROUPS, PLAYING_ROLES, STUDENT_STATUS } from '@/lib/constants';
 import { todayISO } from '@/lib/dates';
 import { FormError, date, oneOf, phone, run, text } from '@/lib/form';
+import { phoneKey } from '@/lib/family';
 
 async function parseStudent(fd: FormData) {
   const branchId = text(fd, 'branchId', { required: true, label: 'Branch' });
@@ -19,6 +20,7 @@ async function parseStudent(fd: FormData) {
   }
   const dob = date(fd, 'dob', { label: 'Date of birth' });
   if (dob && dob > todayISO()) throw new FormError('Date of birth cannot be in the future.');
+  const guardianPhone = phone(fd, 'guardianPhone', { required: true, label: 'Guardian phone' })!;
 
   return {
     name: text(fd, 'name', { required: true, label: 'Full name', max: 80 }),
@@ -26,7 +28,9 @@ async function parseStudent(fd: FormData) {
     ageGroup: oneOf(fd, 'ageGroup', AGE_GROUPS, { required: true, label: 'Age group' }),
     playingRole: oneOf(fd, 'playingRole', PLAYING_ROLES, { label: 'Playing role' }),
     guardianName: text(fd, 'guardianName', { label: 'Guardian name', max: 80 }),
-    guardianPhone: phone(fd, 'guardianPhone', { required: true, label: 'Guardian phone' })!,
+    guardianPhone,
+    // Links the student to the parent app login for this phone.
+    guardianPhoneKey: phoneKey(guardianPhone),
     status: oneOf(fd, 'status', Object.keys(STUDENT_STATUS), { label: 'Status' }) ?? 'ACTIVE',
     joinedOn: date(fd, 'joinedOn', { label: 'Joining date' }) ?? todayISO(),
     notes: text(fd, 'notes', { label: 'Notes', max: 500 }),

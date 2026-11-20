@@ -38,6 +38,33 @@ Green **WhatsApp** buttons open WhatsApp (phone app or WhatsApp Web) with a mess
 
 Clicking a button is logged as "sent"; WhatsApp does not report whether you actually pressed Send. Phone numbers without a country code are treated as Indian (+91). Fee reminders are admin-only; coaches can send absence notices.
 
+## Fee receipts
+
+Every payment recorded in **Fees & Finance** (or on a student's profile) gets a receipt number like `IA/2026-27/0001`.
+
+- Numbers run per Indian financial year (1 April – 31 March) and restart at 0001 each April. The year comes from the payment date.
+- Numbers are never reused. Deleting a payment cancels its receipt number; the next payment gets the next number.
+- Open a receipt from the 📄 icon in *Payments received* or the receipt number on the student's profile. **Print / Save as PDF** uses the browser's print dialog (choose "Save as PDF" as the printer).
+- **Send on WhatsApp** sends the receipt details as a text message (WhatsApp links cannot attach files; send the saved PDF yourself if the parent wants a copy).
+- **Settings → Receipt details**: receipt prefix, academy address and phone, and a note printed at the bottom. **Settings → WhatsApp messages**: the receipt message text (English/Hindi presets).
+- Payments recorded before receipts existed get a number the first time their receipt is opened.
+
+## Parent & student app
+
+Parents (and students, using the parent's login) open **`/parent/login`** and log in with the **guardian phone number** saved on the student's record and a **6-digit PIN**. They see, for each child on that phone number:
+
+- Training schedule and next session (batch, days, time, venue, coach)
+- Attendance for the last 30 days
+- Fees: this month's status, payment history and printable receipts
+- Coach ratings (batting, bowling, fielding, fitness) with the coach's notes
+- Upcoming tournaments for the child's age group
+
+They cannot see internal student notes, the "Review" status, other families, or any staff page.
+
+**Giving access (admin):** open the student's profile → *Parent app* → **Give parent access**. A PIN is shown once, with a ready WhatsApp message (link + phone + PIN). Siblings with the same guardian phone share one login. **New PIN** replaces the old one and logs the family out everywhere. **Settings → Parent app** lists every parent login, lets you switch one off or remove it, and holds the app's public address used in the login link.
+
+Until the app is online, the login link only works on the computer running it (the PIN window warns about this). After hosting, set the address in **Settings → Parent app** and send new PINs. Five wrong PINs lock that phone number for 15 minutes.
+
 ## Roles
 
 | | Administrator | Coach |
@@ -45,9 +72,10 @@ Clicking a button is logged as "sent"; WhatsApp does not report whether you actu
 | Dashboard, students, attendance, assessments, tournaments | ✅ | ✅ |
 | View coaches and batches | ✅ | ✅ |
 | Add/edit coaches, batches, branches | ✅ | ❌ |
-| Fees & Finance, Reports, CSV export | ✅ | ❌ |
+| Fees & Finance, receipts, Reports, CSV export | ✅ | ❌ |
 | Delete students, payments, assessments | ✅ | ❌ |
 | Create logins for other users | ✅ | ❌ |
+| Give / reset / switch off parent app PINs | ✅ | ❌ |
 
 Administrators create logins from **Settings → Users**.
 
@@ -79,10 +107,12 @@ SQLite suits a single computer. To deploy online with several users, switch to P
 
 ```
 app/(app)/            Logged-in pages (one folder per section, each with page.tsx + actions.ts)
-app/login/            Login page and login/logout actions
+app/login/            Staff login page and login/logout actions
+app/parent/           Parent & student app (own login, own session cookie)
+app/receipt/          Printable receipt page for staff
 app/api/export/       CSV downloads
 components/           Shared UI (sidebar shell, modal form, toast, chart)
 lib/                  Database client, auth/session, dates (IST), validation, queries
 prisma/               Schema, migrations and seed script
-middleware.ts         Sends logged-out visitors to /login
+middleware.ts         Sends logged-out visitors to /login (staff) or /parent/login (parents)
 ```

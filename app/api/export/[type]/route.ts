@@ -28,8 +28,8 @@ async function build(type: string) {
   if (type === 'payments') {
     const payments = await db.feePayment.findMany({ orderBy: [{ paidOn: 'desc' }], include: { student: true } });
     return csv(
-      ['Paid on', 'Fee month', 'Student', 'Amount (INR)', 'Method', 'Reference'],
-      payments.map((p) => [p.paidOn, p.forMonth, p.student.name, p.amount, PAYMENT_METHODS[p.method], p.reference]),
+      ['Receipt no.', 'Paid on', 'Fee month', 'Student', 'Amount (INR)', 'Method', 'Reference', 'Recorded by'],
+      payments.map((p) => [p.receiptNo, p.paidOn, p.forMonth, p.student.name, p.amount, PAYMENT_METHODS[p.method], p.reference, p.recordedBy]),
     );
   }
   if (type === 'attendance') {

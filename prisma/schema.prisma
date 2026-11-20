@@ -73,6 +73,8 @@ model Student {
   playingRole   String? // Batter, Bowler, All-rounder, WK-Batter
   guardianName  String?
   guardianPhone String
+  // guardianPhone as digits with country code (919876543210); links the student to a parent login.
+  guardianPhoneKey String?
   status        String       @default("ACTIVE") // ACTIVE | REVIEW | INACTIVE
   joinedOn      String // YYYY-MM-DD
   notes         String?
@@ -88,6 +90,20 @@ model Student {
 
   @@index([branchId])
   @@index([batchId])
+  @@index([guardianPhoneKey])
+}
+
+// Parent / student app login. One per guardian phone; it shows every student with that phone.
+model FamilyLogin {
+  id             String    @id @default(cuid())
+  phoneKey       String    @unique // same format as Student.guardianPhoneKey
+  pinHash        String
+  active         Boolean   @default(true)
+  // Bumped on PIN reset or disable so older sessions stop working.
+  sessionVersion Int       @default(1)
+  lastLoginAt    DateTime?
+  createdBy      String?
+  createdAt      DateTime  @default(now())
 }
 
 // A WhatsApp message opened for a parent (fee reminder or absence notice).
@@ -133,6 +149,9 @@ model FeePayment {
   paidOn    String // YYYY-MM-DD
   method    String   @default("CASH") // CASH | UPI | CARD | BANK
   reference String?
+  // e.g. IA/2026-27/0001; numbered per Indian financial year (Apr-Mar), never reused.
+  receiptNo  String? @unique
+  recordedBy String?
   studentId String
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

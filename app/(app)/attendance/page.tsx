@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { db } from '@/lib/db';
 import { requireUser } from '@/lib/auth';
 import { formatDate, formatTime, todayISO, weekdayShort } from '@/lib/dates';
-import { absenceNoticeUrl, getMessageSettings } from '@/lib/settings';
+import { absenceNoticeUrl, getSettings } from '@/lib/settings';
 import { Empty, PageHeader, Panel } from '@/components/ui';
 import { AttendanceSheet } from './AttendanceSheet';
 import { saveAttendance } from './actions';
@@ -32,7 +32,7 @@ export default async function AttendancePage({ searchParams }: { searchParams: {
   const [records, notices, settings] = await Promise.all([
     db.attendance.findMany({ where: { date: day, studentId: { in: studentIds } }, select: { studentId: true, status: true } }),
     db.reminder.findMany({ where: { kind: 'ABSENT', ref: day, studentId: { in: studentIds } }, select: { studentId: true } }),
-    getMessageSettings(),
+    getSettings(),
   ]);
   const statusOf = new Map(records.map((r) => [r.studentId, r.status]));
   const notified = new Set(notices.map((n) => n.studentId));

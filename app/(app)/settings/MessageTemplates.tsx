@@ -6,7 +6,11 @@ import { MESSAGE_PRESETS, PLACEHOLDERS, type MessageSettings, fillTemplate } fro
 import { updateMessageSettings } from '@/lib/reminder-actions';
 import { useToast } from '@/components/Toast';
 
-const SAMPLE = { parent: 'Mr. Verma', student: 'Ananya Verma', batch: 'Elite Juniors', amount: '₹ 2,500', month: 'Nov 2026', date: '20 Nov 2026' };
+const SAMPLE = {
+  parent: 'Mr. Verma', student: 'Ananya Verma', batch: 'Elite Juniors', amount: '₹ 2,500', month: 'Nov 2026', date: '20 Nov 2026',
+  receipt: 'IA/2026-27/0001', method: 'UPI', students: 'Ananya & Arjun Verma', link: 'https://your-academy-address/parent/login',
+  phone: '+91 98765 43210', pin: '482913',
+};
 
 /** Admin editor for the academy name and WhatsApp message templates, with a live preview. */
 export function MessageTemplates({ initial }: { initial: MessageSettings }) {
@@ -36,7 +40,7 @@ export function MessageTemplates({ initial }: { initial: MessageSettings }) {
       <div className="preset-row">
         <span className="muted">Start from:</span>
         {Object.entries(MESSAGE_PRESETS).map(([key, p]) => (
-          <button key={key} type="button" className="secondary-btn" onClick={() => setValues((v) => ({ ...v, feeTemplate: p.fee, absentTemplate: p.absent }))}>
+          <button key={key} type="button" className="secondary-btn" onClick={() => setValues((v) => ({ ...v, feeTemplate: p.fee, absentTemplate: p.absent, receiptTemplate: p.receipt, parentAccessTemplate: p.access }))}>
             {p.label}
           </button>
         ))}
@@ -46,6 +50,10 @@ export function MessageTemplates({ initial }: { initial: MessageSettings }) {
       <div className="preview-box"><small>Preview</small>{preview(values.feeTemplate)}</div>
       <label>Absence message<textarea name="absentTemplate" rows={4} maxLength={1000} required value={values.absentTemplate} onChange={set('absentTemplate')} /></label>
       <div className="preview-box"><small>Preview</small>{preview(values.absentTemplate)}</div>
+      <label>Payment receipt message<textarea name="receiptTemplate" rows={4} maxLength={1000} required value={values.receiptTemplate} onChange={set('receiptTemplate')} /></label>
+      <div className="preview-box"><small>Preview</small>{preview(values.receiptTemplate)}</div>
+      <label>Parent app login message<textarea name="parentAccessTemplate" rows={7} maxLength={1000} required value={values.parentAccessTemplate} onChange={set('parentAccessTemplate')} /></label>
+      <div className="preview-box"><small>Preview</small>{preview(values.parentAccessTemplate)}</div>
       <details className="placeholder-help">
         <summary>Words you can use in messages</summary>
         <ul>{Object.entries(PLACEHOLDERS).map(([k, v]) => <li key={k}><code>{k}</code> {v}</li>)}</ul>

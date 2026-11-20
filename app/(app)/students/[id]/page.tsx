@@ -8,8 +8,10 @@ import { addDays, ageFrom, currentMonth, formatDate, monthLabel, todayISO } from
 import { inr, percent } from '@/lib/format';
 import { attended, formOptions } from '@/lib/queries';
 import { whatsappUrl } from '@/lib/messages';
-import { absenceNoticeUrl, feeReminderUrl, getMessageSettings } from '@/lib/settings';
+import { absenceNoticeUrl, feeReminderUrl, getSettings, receiptMessageUrl } from '@/lib/settings';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
+import { ParentAccessButton } from '@/components/ParentAccessButton';
+import { ensurePhoneKeys, phoneKey } from '@/lib/family';
 import { FormModal } from '@/components/FormModal';
 import { ConfirmAction } from '@/components/ConfirmAction';
 import { AttendanceBar, Avatar, Empty, Panel, StatusPill } from '@/components/ui';
@@ -35,9 +37,19 @@ export default async function StudentPage({ params }: { params: { id: string } }
     },
   });
   if (!student) notFound();
-  const [options, settings] = await Promise.all([formOptions(), getMessageSettings()]);
+  const [options, settings] = await Promise.all([formOptions(), getSettings()]);
   const contact = { ...student, batchName: student.batch?.name };
   const lastAbsence = student.attendance.find((a) => a.status === 'ABSENT' && a.date >= addDays(todayISO(), -13));
+
+  // Parent app access is per guardian phone, shared by siblings with the same number.
+  const familyKey = phoneKey(student.guardianPhone);
+  if (isAdmin && familyKey) await ensurePhoneKeys();
+  const [familyLogin, siblings] = isAdmin && familyKey
+    ? await Promise.all([
+        db.familyLogin.findUnique({ where: { phoneKey: familyKey } }),
+        db.student.findMany({ where: { guardianPhoneKey: familyKey, id: { not: student.id } }, select: { id: true, name: true } }),
+      ])
+    : [null, []];
 
   const since = addDays(todayISO(), -29);
   const recent = student.attendance.filter((a) => a.date >= since);
@@ -91,6 +103,26 @@ export default async function StudentPage({ params }: { params: { id: string } }
             <dt>Joined</dt><dd>{formatDate(student.joinedOn)}</dd>
             <dt>Branch</dt><dd>{student.branch.name}</dd>
             <dt>Notes</dt><dd>{student.notes ?? '—'}</dd>
+            {isAdmin && (
+              <>
+                <dt>Parent app</dt>
+                <dd className="parent-access">
+                  {!familyKey ? (
+                    <span className="muted">Guardian phone isn&apos;t valid, so no login can be made.</span>
+                  ) : (
+                    <>
+                      <span>
+                        {!familyLogin ? <span className="muted">Not set up</span>
+                          : !familyLogin.active ? <span className="c-absent">Switched off</span>
+                          : <span className="c-present">Active{familyLogin.lastLoginAt ? ` · last login ${formatDate(todayISO(familyLogin.lastLoginAt))}` : ' · not used yet'}</span>}
+                        {siblings.length > 0 && <small className="muted block">Same login shows: {siblings.map((s) => s.name).join(', ')}</small>}
+                      </span>
+                      <ParentAccessButton studentId={student.id} hasLogin={!!familyLogin} className="text-btn" />
+                    </>
+                  )}
+                </dd>
+              </>
+            )}
             <dt>WhatsApp</dt>
             <dd className="wa-actions">
               {isAdmin && fee > 0 && paidThisMonth < fee && (
@@ -116,7 +148,11 @@ export default async function StudentPage({ params }: { params: { id: string } }
                   <ul className="reminder-log">
                     {student.reminders.map((r) => (
                       <li key={r.id}>
-                        {r.kind === 'FEE' ? `Fee · ${monthLabel(r.ref)}` : `Absent · ${formatDate(r.ref)}`}
+                        {r.kind === 'FEE'
+                          ? `Fee reminder · ${monthLabel(r.ref)}`
+                          : r.kind === 'RECEIPT'
+                            ? `Receipt · ${student.payments.find((p) => p.id === r.ref)?.receiptNo ?? 'deleted payment'}`
+                            : `Absent · ${formatDate(r.ref)}`}
                         <small className="muted"> — {formatDate(todayISO(r.createdAt))}{r.sentBy ? ` by ${r.sentBy}` : ''}</small>
                       </li>
                     ))}
@@ -154,15 +190,21 @@ export default async function StudentPage({ params }: { params: { id: string } }
             {student.payments.length === 0 ? <Empty title="No payments recorded" /> : (
               <div className="table-wrap">
                 <table>
-                  <thead><tr><th>PAID ON</th><th>FOR</th><th>AMOUNT</th><th>METHOD</th><th /></tr></thead>
+                  <thead><tr><th>RECEIPT</th><th>PAID ON</th><th>FOR</th><th>AMOUNT</th><th>METHOD</th><th /></tr></thead>
                   <tbody>
                     {student.payments.map((p) => (
                       <tr key={p.id}>
+                        <td><Link className="text-btn" href={`/receipt/${p.id}`} target="_blank">{p.receiptNo ?? 'View'}</Link></td>
                         <td>{formatDate(p.paidOn)}</td>
                         <td>{monthLabel(p.forMonth)}</td>
                         <td><b>{inr(p.amount)}</b></td>
                         <td>{PAYMENT_METHODS[p.method] ?? p.method}{p.reference ? <small className="muted"> · {p.reference}</small> : null}</td>
-                        <td><ConfirmAction action={deletePayment.bind(null, p.id)} confirmText={`Delete this payment of ${inr(p.amount)}?`} label="Delete"><Trash2 size={14} /></ConfirmAction></td>
+                        <td>
+                          <div className="row-actions">
+                            <WhatsAppButton href={receiptMessageUrl(settings, contact, p)} log={{ studentId: student.id, kind: 'RECEIPT', ref: p.id }} label="Send receipt" compact />
+                            <ConfirmAction action={deletePayment.bind(null, p.id)} confirmText={`Delete this payment of ${inr(p.amount)}?${p.receiptNo ? ` Receipt ${p.receiptNo} will be cancelled.` : ''}`} label="Delete"><Trash2 size={14} /></ConfirmAction>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

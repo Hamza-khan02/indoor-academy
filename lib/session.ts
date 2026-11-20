@@ -25,8 +25,34 @@ export async function signSession(payload: SessionPayload) {
 export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secretKey(), { algorithms: ['HS256'] });
+    if (payload.typ === 'parent') return null; // a parent token never opens staff pages
     if (typeof payload.uid !== 'string' || typeof payload.role !== 'string') return null;
     return { uid: payload.uid, role: payload.role };
+  } catch {
+    return null;
+  }
+}
+
+// ---- Parent / student app sessions (separate cookie and token type) ----
+
+export const PARENT_COOKIE = 'ia_parent';
+export const PARENT_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+export type ParentSessionPayload = { fid: string; v: number };
+
+export async function signParentSession(payload: ParentSessionPayload) {
+  return new SignJWT({ ...payload, typ: 'parent' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(`${PARENT_MAX_AGE}s`)
+    .sign(secretKey());
+}
+
+export async function verifyParentSession(token: string): Promise<ParentSessionPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey(), { algorithms: ['HS256'] });
+    if (payload.typ !== 'parent' || typeof payload.fid !== 'string' || typeof payload.v !== 'number') return null;
+    return { fid: payload.fid, v: payload.v };
   } catch {
     return null;
   }

@@ -1,11 +1,11 @@
 import Link from 'next/link';
-import { Download, Plus, Trash2 } from 'lucide-react';
+import { Download, FileText, Plus, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
 import { requireAdminPage } from '@/lib/auth';
 import { PAYMENT_METHODS } from '@/lib/constants';
 import { currentMonth, formatDate, monthLabel, todayISO } from '@/lib/dates';
 import { inr } from '@/lib/format';
-import { feeReminderUrl, getMessageSettings } from '@/lib/settings';
+import { feeReminderUrl, getSettings, receiptMessageUrl } from '@/lib/settings';
 import { WhatsAppButton } from '@/components/WhatsAppButton';
 import { FormModal } from '@/components/FormModal';
 import { ConfirmAction } from '@/components/ConfirmAction';
@@ -28,12 +28,15 @@ export default async function FeesPage({ searchParams }: { searchParams: { month
     db.feePayment.findMany({
       where: { forMonth: month },
       orderBy: [{ paidOn: 'desc' }, { createdAt: 'desc' }],
-      include: { student: { select: { name: true } } },
+      include: { student: { select: { name: true, guardianName: true, guardianPhone: true, batch: { select: { name: true } } } } },
     }),
-    getMessageSettings(),
+    getSettings(),
     db.reminder.groupBy({ by: ['studentId'], where: { kind: 'FEE', ref: month }, _count: { _all: true }, _max: { createdAt: true } }),
   ]);
   const reminded = new Map(reminders.map((r) => [r.studentId, { count: r._count._all, last: r._max.createdAt }]));
+  const receiptSent = new Set(
+    (await db.reminder.findMany({ where: { kind: 'RECEIPT', ref: { in: payments.map((p) => p.id) } }, select: { ref: true } })).map((r) => r.ref),
+  );
 
   const paidBy = new Map<string, number>();
   for (const p of payments) paidBy.set(p.studentId, (paidBy.get(p.studentId) ?? 0) + p.amount);
@@ -138,9 +141,22 @@ export default async function FeesPage({ searchParams }: { searchParams: { month
                   <div className="stack">
                     <b>{p.student.name}</b>
                     <small className="muted">{formatDate(p.paidOn)} · {PAYMENT_METHODS[p.method] ?? p.method}{p.reference ? ` · ${p.reference}` : ''}</small>
+                    <small className="muted">
+                      {p.receiptNo ?? 'No receipt no. yet'}
+                      {receiptSent.has(p.id) && <span className="c-present"> · receipt sent</span>}
+                    </small>
                   </div>
                   <strong>{inr(p.amount)}</strong>
-                  <ConfirmAction action={deletePayment.bind(null, p.id)} confirmText={`Delete ${p.student.name}'s payment of ${inr(p.amount)}?`} label="Delete"><Trash2 size={14} /></ConfirmAction>
+                  <div className="row-actions">
+                    <Link className="icon-action" href={`/receipt/${p.id}`} target="_blank" aria-label="Open receipt" title="Open receipt"><FileText size={15} /></Link>
+                    <WhatsAppButton
+                      href={receiptMessageUrl(settings, { ...p.student, batchName: p.student.batch?.name }, p)}
+                      log={{ studentId: p.studentId, kind: 'RECEIPT', ref: p.id }}
+                      label="Send receipt"
+                      compact
+                    />
+                    <ConfirmAction action={deletePayment.bind(null, p.id)} confirmText={`Delete ${p.student.name}'s payment of ${inr(p.amount)}?${p.receiptNo ? ` Receipt ${p.receiptNo} will be cancelled.` : ''}`} label="Delete"><Trash2 size={14} /></ConfirmAction>
+                  </div>
                 </li>
               ))}
             </ul>
