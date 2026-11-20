@@ -1,21 +1,32 @@
 # INDOOR ACADEMY
 
-Management app for a cricket academy: students, coaches, batches, attendance, fees, performance assessments, tournaments, branches and reports. Built with Next.js 14 (App Router), Prisma and SQLite.
+Management app for a cricket academy: students, coaches, batches, attendance, fees, performance assessments, tournaments, branches and reports. Built with Next.js 14.2 (App Router), Prisma and SQLite.
 
-## First-time setup
+## First-time setup (new computer)
 
-1. Install Node.js 18 or newer.
-2. Copy `.env.example` to `.env` and fill it in:
-   - `AUTH_SECRET`: a long random string. You can generate one with
-     `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`
-   - `ADMIN_EMAIL` and `ADMIN_PASSWORD`: the first administrator login.
-3. Install packages: `npm install`. If npm asks you to approve install scripts, run
-   `npm approve-scripts prisma @prisma/client @prisma/engines`.
-4. Create the database and the first admin: `npm run setup`
-5. Start the app: `npm run dev`, then open http://localhost:3000 and log in with the admin email and password from `.env`.
-6. Change the admin password from **Settings** after the first login.
+1. Install **Node.js** (LTS) from https://nodejs.org and **Git** from https://git-scm.com.
+2. Download the project and open its folder:
+   ```
+   git clone https://github.com/Hamza-khan02/indoor-academy.git
+   cd indoor-academy
+   ```
+3. Install and set up:
+   ```
+   npm install
+   npm run setup
+   ```
+   `npm run setup` creates the `.env` file (with a random secret key and admin password), the database, and the first admin. **At the end it prints the admin email and password** — note them down (they are also saved in `.env`).
+   If `npm install` asks you to approve install scripts, run `npm approve-scripts prisma @prisma/client @prisma/engines`, then `npm install` again.
+4. Start the app: `npm run dev`, then open http://localhost:3000 and log in.
+5. Change the admin password from **Settings** after the first login.
+
+Running `npm run setup` again is safe: it never overwrites real values in `.env` or data in the database. If you prefer to choose the admin email/password yourself, copy `.env.example` to `.env`, fill in `ADMIN_EMAIL` and `ADMIN_PASSWORD` before running setup (any placeholder values left in it are replaced with random ones).
+
+**Moving data from another computer:** copy both `.env` and `prisma/dev.db` from the old computer into the same places, then run `npm install` and `npm run setup`. Log in with the old admin account.
 
 The seed creates the admin user and three branches (Sultanpur Main, North and South). Rename or delete them from **Branches**. No sample students or payments are created, so every number on the dashboard comes from data you enter.
+
+> **Security note:** the project uses Next.js 14.2.35, the last 14.x release. Some advisories are only fixed in Next.js 15/16; plan that upgrade before putting the app on the internet.
 
 ## Getting started in the app
 
@@ -85,7 +96,7 @@ Administrators create logins from **Settings → Users**.
 |---|---|
 | `npm run dev` | Start the app for local use / development |
 | `npm run build` then `npm start` | Run an optimised production build |
-| `npm run setup` | Apply database migrations and create the first admin |
+| `npm run setup` | Create `.env` if missing, apply database migrations, create the first admin (safe to re-run) |
 | `npm run db:migrate` | After changing `prisma/schema.prisma`, create and apply a migration |
 | `npm run db:studio` | Open Prisma Studio to browse the database |
 
