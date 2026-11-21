@@ -215,7 +215,7 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
           )}
         </Panel>
 
-        <Panel title="Match record" subtitle="Career stats from the academy's match scorecards" className="portal-wide">
+        <Panel title="Match record" subtitle="Career stats from the academy's match scorecards" className="portal-wide" action={<Link className="text-btn" href={`/parent/career?child=${student.id}`}>Full career stats →</Link>}>
           <MatchRecord rows={student.matchStats} />
         </Panel>
 

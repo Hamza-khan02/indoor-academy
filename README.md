@@ -95,6 +95,18 @@ Each student can have a profile photo, shown on their profile, in the student li
 - **Performance** lists the top run scorers and wicket takers.
 - Admins and coaches can add matches and scorecards; only admins can delete a match.
 
+## Career stats
+
+Every student has a full career page (**Full career stats →** on the profile's *Match record*, and the same link in the parent app):
+
+- **Totals**: matches, runs, highest score, average, strike rate, wickets, best bowling, economy, catches.
+- **Season by season** (season = April–March, e.g. 2026-27) and **by match type** (practice, friendly, tournament, league).
+- **Graphs**: runs and wickets in each match, and the coach rating (average and each skill) over time.
+- **Milestones**: first match, first fifty / hundred, first 3- and 5-wicket hauls, 100/250/500/1000 career runs, 10/25/50/100 wickets, highest score, best bowling, best fielding match.
+- **Rank in batch** (or age group if no batch): runs, wickets, batting average (needs 3 innings) and catches + stumpings, among players with match records.
+- **Overall performance score (0–100)**: coach rating (latest assessment average × 10) 40%, attendance in the last 90 days 30%, match performance 30% — (runs + 20 per wicket + 10 per catch/stumping/run out) per match × 2, capped at 100. Parts without data are left out and the others count for more. The page shows each part, so the number is explainable. It is a guide, not a selection decision.
+- **Career card**: a one-page printable card (photo, stats, seasons, milestones, rating, ranks) — *Career card* button → *Print / Save as PDF*. Parents can print their own child's card.
+
 ## Tournament squads
 
 Open a tournament (title or *Squad* link) to tick the selected players and give each a role (Captain, Vice-captain, Wicket-keeper, Player, Reserve; one captain and one vice-captain). The list starts with the tournament's age group; tick "Show all age groups" to pick others. In the parent app, a selected child sees a "has been selected" banner and a *Selected* tag on the tournament. A match linked to a tournament can add the whole squad to its scorecard in one click.

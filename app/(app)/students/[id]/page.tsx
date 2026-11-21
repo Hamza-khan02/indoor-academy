@@ -208,6 +208,7 @@ export default async function StudentPage({ params }: { params: { id: string } }
 
       <Panel
         title="Match record"
+        action={<Link className="text-btn" href={`/students/${student.id}/career`}>Full career stats →</Link>}
         subtitle={student.squads.length ? `Tournament squads: ${student.squads.map((s) => `${s.tournament.name}${s.role !== 'PLAYER' ? ` (${SQUAD_ROLES[s.role]})` : ''}`).join(', ')}` : 'Career stats from match scorecards'}
         className="spaced-bottom"
       >

@@ -519,6 +519,79 @@ a.player-cell:hover b { color:#ff8a8a }
   .recent-matches .line { margin-left:0; width:100% }
 }
 
+/* ---------- Career stats ---------- */
+.career-hero { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:14px }
+.career-hero .avatar { width:64px; height:64px; font-size:20px; border-radius:16px }
+.career-hero-copy { flex:1; min-width:220px }
+.career-hero h1 { font:600 26px 'Space Grotesk'; margin:6px 0 4px; letter-spacing:-.6px }
+.career-hero p { margin:0; color:#85858f; font-size:12px }
+.score-badge { display:flex; align-items:baseline; gap:3px; background:linear-gradient(145deg,#341719,#1f1416); border:1px solid #4a2228; border-radius:14px; padding:10px 16px }
+.score-badge b { font:700 32px 'Space Grotesk'; color:#ff6b6b; letter-spacing:-1px }
+.score-badge span { color:#a0a0aa; font-size:12px }
+.career-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(105px,1fr)); gap:10px; margin-bottom:15px }
+.career-strip div { background:#141418; border:1px solid #29292f; border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:4px }
+.career-strip small { color:#85858f; font-size:9px; letter-spacing:.8px; text-transform:uppercase }
+.career-strip b { font:600 20px 'Space Grotesk' }
+.score-parts { list-style:none; margin:0; padding:0; display:grid; gap:14px }
+.score-parts li.missing { opacity:.45 }
+.score-part-head { display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:12px }
+.score-part-head b { font:600 16px 'Space Grotesk' }
+.score-parts .progress { margin-top:7px; height:7px }
+.score-help { margin:14px 0 0 }
+.rank-tiles { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.rank-tiles li { background:#1a1a20; border:1px solid #27272e; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:3px; font-size:11px }
+.rank-tiles small { color:#85858f; font-size:9px; letter-spacing:.8px; text-transform:uppercase }
+.rank-tiles b { font:700 22px 'Space Grotesk'; color:#f4f4f5 }
+.rank-tiles b span { font-size:12px; color:#85858f; font-weight:500 }
+.chart.tall { height:230px }
+.stats-table th, .stats-table td { text-align:center; padding-left:6px; padding-right:6px }
+.stats-table th:first-child, .stats-table td:first-child { text-align:left }
+.milestones { list-style:none; margin:0; padding:0; display:grid; gap:2px }
+.milestones li { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid #25252b; font-size:12px }
+.milestones li:first-child { border-top:0 }
+.m-icon { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; flex-shrink:0; background:#25252b; color:#c3c3cb }
+.m-bat .m-icon { background:#3a1d20; color:#f87171 }
+.m-bowl .m-icon { background:#192b3c; color:#60a5fa }
+.m-field .m-icon { background:#173027; color:#4ade80 }
+.m-start .m-icon { background:#342719; color:#fbbf24 }
+
+/* Printable career card (light) */
+.career-card { width:min(760px,100%); background:#fff; color:#1c1c22; border-radius:10px; padding:32px 36px; box-shadow:0 20px 60px #0007; font-size:12px; line-height:1.5 }
+.career-card h3 { font:700 12px 'Space Grotesk'; letter-spacing:1px; text-transform:uppercase; color:#dc2626; margin:18px 0 8px }
+.cc-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; border-bottom:2px solid #dc2626; padding-bottom:14px }
+.cc-head small { color:#6b6b76; font-size:10px; letter-spacing:1.5px; font-weight:700 }
+.cc-head h1 { font:700 22px 'Space Grotesk'; margin:4px 0 0 }
+.cc-score { text-align:right }
+.cc-score b { font:700 34px 'Space Grotesk'; color:#dc2626; display:block; line-height:1 }
+.cc-score span { color:#6b6b76; font-size:10px }
+.cc-player { display:flex; gap:16px; align-items:center; padding:16px 0 4px }
+.cc-photo { width:84px; height:84px; border-radius:14px; overflow:hidden; display:grid; place-items:center; font:700 26px 'Space Grotesk'; background:#f1f1f4; flex-shrink:0 }
+.cc-photo img { width:100%; height:100%; object-fit:cover }
+.cc-player h2 { font:700 20px 'Space Grotesk'; margin:0 0 2px }
+.cc-player p { margin:0; color:#3f3f46 }
+.cc-muted { color:#7a7a85 }
+.cc-stats { display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-top:14px }
+.cc-stats div { background:#f6f6f8; border-radius:8px; padding:8px 10px; display:flex; flex-direction:column }
+.cc-stats small { color:#6b6b76; font-size:9px; text-transform:uppercase; letter-spacing:.5px }
+.cc-stats b { font:700 16px 'Space Grotesk' }
+.cc-table { width:100%; border-collapse:collapse; white-space:normal }
+.cc-table th { background:#f4f4f6; color:#6b6b76; font-size:10px; padding:6px 8px; text-align:center }
+.cc-table td { border-top:1px solid #e6e6ea; padding:6px 8px; text-align:center; color:#1c1c22; font-size:12px }
+.cc-table th:first-child, .cc-table td:first-child { text-align:left; padding-left:8px }
+.cc-two { display:grid; grid-template-columns:1fr 1fr; gap:20px }
+.cc-list { margin:0; padding-left:16px; display:grid; gap:4px }
+.cc-foot { margin-top:22px; padding-top:10px; border-top:1px solid #e6e6ea; color:#7a7a85; font-size:10px; text-align:center }
+@media print {
+  .career-card { box-shadow:none; border-radius:0; padding:0; width:100% }
+  .cc-photo, .cc-stats div, .cc-table th { -webkit-print-color-adjust:exact; print-color-adjust:exact }
+}
+@media (max-width:760px) {
+  .rank-tiles { grid-template-columns:1fr 1fr }
+  .career-card { padding:20px 16px }
+  .cc-stats { grid-template-columns:repeat(3,1fr) }
+  .cc-two { grid-template-columns:1fr }
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width:1200px) {
   .content { padding:27px 24px }
