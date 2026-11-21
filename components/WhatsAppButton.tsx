@@ -14,7 +14,7 @@ export function WhatsAppButton({
   compact = false,
 }: {
   href: string | null;
-  log?: { studentId: string; kind: 'FEE' | 'ABSENT' | 'RECEIPT'; ref: string };
+  log?: { studentId: string; kind: 'FEE' | 'ABSENT' | 'RECEIPT' | 'REPORT'; ref: string };
   label?: string;
   compact?: boolean;
 }) {

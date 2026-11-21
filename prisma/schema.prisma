@@ -102,6 +102,19 @@ model DrillStudent {
   @@index([studentId])
 }
 
+// Coach's comment on a student's monthly progress report.
+model ProgressComment {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  month     String // YYYY-MM
+  comment   String
+  author    String?
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, month])
+}
+
 // A student (or parent) marked the drill as done in the parent app.
 model DrillCompletion {
   id        String   @id @default(cuid())
@@ -178,6 +191,7 @@ model Student {
   squads        TournamentSquad[]
   drillTargets  DrillStudent[]
   drillsDone    DrillCompletion[]
+  progressNotes ProgressComment[]
   photo         StudentPhoto?
   // Set when a profile photo is saved; used as the image's cache-busting version. Null = no photo.
   photoUpdatedAt DateTime?

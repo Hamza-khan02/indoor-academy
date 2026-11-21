@@ -122,6 +122,7 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
           <h1>{student.name}</h1>
           <p>{student.ageGroup}{student.playingRole ? ` · ${student.playingRole}` : ''} · {student.batch?.name ?? 'No batch yet'} · {student.branch.name}</p>
         </div>
+        <Link className="secondary-btn" href={`/parent/report?child=${student.id}`}>📄 Monthly report</Link>
         {inactive && <StatusPill status="INACTIVE" labels={{ INACTIVE: 'Not currently enrolled' }} />}
       </section>
 

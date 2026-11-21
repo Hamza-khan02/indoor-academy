@@ -14,6 +14,8 @@ export async function logReminder(studentId: string, kind: string, ref: string) 
       if (!/^\d{4}-\d{2}$/.test(ref)) throw new FormError('Invalid month.');
     } else if (kind === 'ABSENT') {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(ref)) throw new FormError('Invalid date.');
+    } else if (kind === 'REPORT') {
+      if (!/^\d{4}-\d{2}$/.test(ref)) throw new FormError('Invalid month.');
     } else if (kind === 'RECEIPT') {
       if (user.role !== 'ADMIN') throw new FormError('Only an administrator can send receipts.');
       const payment = await db.feePayment.findUnique({ where: { id: ref }, select: { studentId: true } });

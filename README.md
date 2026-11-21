@@ -86,6 +86,16 @@ Each student can have a profile photo, shown on their profile, in the student li
 - Photos are cropped to a square and shrunk to about 20–40 KB in the browser before upload; the server accepts only real JPG, PNG or WebP files up to 300 KB. They are stored inside the database, so they move with `prisma/dev.db` and backups.
 - A photo is only visible to staff and to that student's own family.
 
+## Monthly progress reports
+
+**Progress reports** (left menu) gives every student a one-page report per month.
+
+- Pick the **month** (early in a month it defaults to the month that just ended) and optionally a **batch**. The list shows attendance, whether the student was rated, matches, the coach's comment and whether the report was sent.
+- **Write** adds the coach's comment for that month (shown on the report and in the WhatsApp summary; empty removes it).
+- **Open report**: attendance (present/late/absent, % and change from last month, day-by-day), coach rating (each skill and change since the previous assessment, notes), matches that month, practice drills done, tournament selections, the month's fee status, and the coach's comment. **Print / Save as PDF**, **Send on WhatsApp** (a short summary to the guardian, logged as sent) and **Add/Edit comment** are at the top.
+- Parents open **📄 Monthly report** in the parent app to see and print the last 6 months for their own child.
+- Admins and coaches can open reports and write comments.
+
 ## Drills & homework
 
 **Drills & homework** (left menu) lets coaches set practice for students to do at home.
