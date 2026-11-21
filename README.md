@@ -86,6 +86,16 @@ Each student can have a profile photo, shown on their profile, in the student li
 - Photos are cropped to a square and shrunk to about 20–40 KB in the browser before upload; the server accepts only real JPG, PNG or WebP files up to 300 KB. They are stored inside the database, so they move with `prisma/dev.db` and backups.
 - A photo is only visible to staff and to that student's own family.
 
+## Drills & homework
+
+**Drills & homework** (left menu) lets coaches set practice for students to do at home.
+
+- **New drill**: title, how to do it, category (batting, bowling, fielding, fitness, other), optional video link (https, e.g. YouTube) and optional *Complete by* date.
+- **Who**: a whole batch (current students), or only the students ticked in the list.
+- Each drill shows **done / total**; open it to see who has done it (with their note) and who hasn't. **Share on WhatsApp** and **Copy** send it to a group.
+- In the parent app, **Practice at home** lists the child's drills (to-do first) with the video button and **Mark as done** (optional note for the coach), which can be undone.
+- Admins and coaches set and edit drills; admins can delete any, coaches only their own. Parents can only mark drills set for their own child.
+
 ## Branch facilities & photos
 
 Open a branch (click its name on **Branches**) to manage what parents see about it:

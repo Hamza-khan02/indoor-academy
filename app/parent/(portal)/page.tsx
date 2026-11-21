@@ -6,6 +6,9 @@ import { noticesForStudent } from '@/lib/notices';
 import { directionsUrl } from '@/lib/maps';
 import { displayFacilities } from '@/lib/facilities';
 import { FacilityChips, PhotoGrid } from '@/components/Facilities';
+import { DRILL_CATEGORIES, drillsForStudent } from '@/lib/drills';
+import { markDrillDone, undoDrillDone } from '@/lib/drill-done-actions';
+import { DrillDone } from '@/components/DrillDone';
 import { ATTENDANCE_STATUS, DAYS, PAYMENT_METHODS, SQUAD_ROLES, TOURNAMENT_STATUS } from '@/lib/constants';
 import { MatchRecord } from '@/components/MatchRecord';
 import { addDays, currentMonth, formatDate, formatLongDate, formatTime, monthLabel, todayISO, weekdayShort } from '@/lib/dates';
@@ -77,6 +80,15 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
     select: { id: true, title: true, body: true, pinned: true, createdAt: true },
   });
   const isNew = (d: Date) => Date.now() - d.getTime() < 3 * 24 * 60 * 60 * 1000;
+  const drills = (
+    await db.drill.findMany({
+      where: drillsForStudent(student, today),
+      include: { completions: { where: { studentId: student.id }, select: { doneAt: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    })
+  ).sort((a, b) => (a.completions.length - b.completions.length) || (a.dueOn ?? '9999').localeCompare(b.dueOn ?? '9999'));
+  const drillsPending = drills.filter((d) => !d.completions.length).length;
 
   const batchDays = student.batch?.days.split(',') ?? [];
   const next = student.batch?.active ? nextSession(batchDays, today) : null;
@@ -138,6 +150,40 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
                 <p className="notice-body">{n.body}</p>
               </li>
             ))}
+          </ul>
+        </section>
+      )}
+
+      {drills.length > 0 && (
+        <section className="panel padded portal-drills">
+          <div className="panel-head">
+            <div><h3>📝 Practice at home</h3><p>{drillsPending ? `${drillsPending} to do` : 'All done — great work!'}</p></div>
+          </div>
+          <ul>
+            {drills.map((d) => {
+              const c = DRILL_CATEGORIES[d.category] ?? DRILL_CATEGORIES.OTHER;
+              const doneAt = d.completions[0]?.doneAt;
+              const overdue = !doneAt && d.dueOn && d.dueOn < today;
+              return (
+                <li key={d.id} className={doneAt ? 'is-done' : ''}>
+                  <div className="notice-title">
+                    <span aria-hidden>{c.emoji}</span>
+                    <b>{d.title}</b>
+                    {d.dueOn && <small className={overdue ? 'c-absent' : 'muted'}>{overdue ? 'was due' : 'by'} {formatDate(d.dueOn)}</small>}
+                  </div>
+                  <p className="notice-body">{d.instructions}</p>
+                  <div className="drill-actions">
+                    {d.videoUrl && <a className="secondary-btn small-btn" href={d.videoUrl} target="_blank" rel="noopener noreferrer">▶ Watch video</a>}
+                    <DrillDone
+                      done={!!doneAt}
+                      doneLabel={doneAt ? `Done on ${formatDate(todayISO(doneAt))}` : ''}
+                      markDone={markDrillDone.bind(null, d.id, student.id)}
+                      undo={undoDrillDone.bind(null, d.id, student.id)}
+                    />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
