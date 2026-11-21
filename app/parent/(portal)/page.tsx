@@ -4,6 +4,8 @@ import { db } from '@/lib/db';
 import { requireFamily } from '@/lib/family';
 import { noticesForStudent } from '@/lib/notices';
 import { directionsUrl } from '@/lib/maps';
+import { displayFacilities } from '@/lib/facilities';
+import { FacilityChips, PhotoGrid } from '@/components/Facilities';
 import { ATTENDANCE_STATUS, DAYS, PAYMENT_METHODS, SQUAD_ROLES, TOURNAMENT_STATUS } from '@/lib/constants';
 import { MatchRecord } from '@/components/MatchRecord';
 import { addDays, currentMonth, formatDate, formatLongDate, formatTime, monthLabel, todayISO, weekdayShort } from '@/lib/dates';
@@ -48,7 +50,7 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
     where: { id: childId },
     include: {
       batch: { include: { coach: { select: { name: true } } } },
-      branch: { select: { name: true, address: true, mapsUrl: true } },
+      branch: { select: { name: true, address: true, mapsUrl: true, facilities: true, photos: { orderBy: { createdAt: 'asc' }, select: { id: true, caption: true } } } },
       attendance: { orderBy: { date: 'desc' }, take: 60, select: { id: true, date: true, status: true } },
       payments: { orderBy: [{ paidOn: 'desc' }, { createdAt: 'desc' }], select: { id: true, amount: true, forMonth: true, paidOn: true, receiptNo: true, method: true } },
       assessments: { orderBy: [{ date: 'desc' }, { createdAt: 'desc' }], take: 20 },
@@ -251,6 +253,13 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
         <Panel title="Match record" subtitle="Career stats from the academy's match scorecards" className="portal-wide" action={<Link className="text-btn" href={`/parent/career?child=${student.id}`}>Full career stats →</Link>}>
           <MatchRecord rows={student.matchStats} />
         </Panel>
+
+        {(displayFacilities(student.branch.facilities).length > 0 || student.branch.photos.length > 0) && (
+          <Panel title={`At ${student.branch.name}`} subtitle="Facilities at your branch" className="portal-wide">
+            <FacilityChips json={student.branch.facilities} />
+            <PhotoGrid photos={student.branch.photos} />
+          </Panel>
+        )}
 
         <Panel title="Health & emergency" subtitle="To change these details, please contact the academy">
           <dl className="details">

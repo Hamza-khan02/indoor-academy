@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import { displayFacilities } from '@/lib/facilities';
 import { MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
 import { directionsUrl } from '@/lib/maps';
 import { db } from '@/lib/db';
@@ -27,7 +29,7 @@ export default async function BranchesPage() {
   const [branches, recent] = await Promise.all([
     db.branch.findMany({
       orderBy: { name: 'asc' },
-      include: { _count: { select: { batches: true, coaches: true } }, students: { where: { status: { not: 'INACTIVE' } }, select: { id: true } } },
+      include: { _count: { select: { batches: true, coaches: true, photos: true } }, students: { where: { status: { not: 'INACTIVE' } }, select: { id: true } } },
     }),
     db.attendance.findMany({ where: { date: { gte: since } }, select: { status: true, student: { select: { branchId: true } } } }),
   ]);
@@ -57,7 +59,7 @@ export default async function BranchesPage() {
             return (
               <article key={b.id} className="panel padded">
                 <div className="panel-head">
-                  <div><h3>{b.name}</h3><p>{b.address ?? 'No address added'}</p>{directionsUrl(b) && <a className="text-btn map-link" href={directionsUrl(b)!} target="_blank" rel="noopener noreferrer"><MapPin size={13} /> {b.mapsUrl ? 'Open in Google Maps' : 'Search address on Google Maps'}</a>}</div>
+                  <div><h3><Link href={`/branches/${b.id}`}>{b.name}</Link></h3><p>{b.address ?? 'No address added'}</p>{directionsUrl(b) && <a className="text-btn map-link" href={directionsUrl(b)!} target="_blank" rel="noopener noreferrer"><MapPin size={13} /> {b.mapsUrl ? 'Open in Google Maps' : 'Search address on Google Maps'}</a>}</div>
                   <div className="row-actions">
                     <FormModal title={`Edit ${b.name}`} trigger={<Pencil size={15} />} triggerClassName="icon-action" triggerLabel="Edit" action={updateBranch.bind(null, b.id)}>
                       <BranchFields branch={b} />
@@ -71,6 +73,7 @@ export default async function BranchesPage() {
                   <div><strong>{b._count.coaches}</strong><small>Coaches</small></div>
                 </div>
                 <div className="branch-att"><small className="muted">Attendance</small><AttendanceBar pct={a ? percent(a.a, a.t) : null} /></div>
+                <Link className="text-btn facilities-link" href={`/branches/${b.id}`}>Facilities & photos ({displayFacilities(b.facilities).length} · {b._count.photos} photos) →</Link>
               </article>
             );
           })}

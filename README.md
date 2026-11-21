@@ -86,6 +86,15 @@ Each student can have a profile photo, shown on their profile, in the student li
 - Photos are cropped to a square and shrunk to about 20–40 KB in the browser before upload; the server accepts only real JPG, PNG or WebP files up to 300 KB. They are stored inside the database, so they move with `prisma/dev.db` and backups.
 - A photo is only visible to staff and to that student's own family.
 
+## Branch facilities & photos
+
+Open a branch (click its name on **Branches**) to manage what parents see about it:
+
+- **Facilities → Edit**: tick what the branch offers (indoor nets, turf/cement pitch, bowling machine, special mentoring, video analysis, floodlights, gym, match practice, kit, changing room, drinking water, parking, first aid, seating for parents, CCTV), add a short detail (e.g. "3 nets"), and add other facilities one per line (e.g. "AC hall").
+- **Photos → Add photos**: pick one or many pictures; each is resized in the browser (longest side 1280 px) before upload. Up to 12 photos per branch; delete with the bin icon.
+- The parent app shows an "At <branch>" panel with the facilities and photos for the child's branch (hidden until something is added). Photos are visible only to logged-in staff and families.
+- Only administrators can change facilities and photos.
+
 ## Notice board
 
 **Notices** (left menu) holds announcements for families: holidays, timing changes, tournament news, fee dates.

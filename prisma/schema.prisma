@@ -28,6 +28,9 @@ model Branch {
   name      String    @unique
   address   String?
   mapsUrl   String? // Google Maps share link, e.g. https://maps.app.goo.gl/...
+  // JSON list of facilities: [{ "key": "INDOOR_NETS", "detail": "3 nets" }, { "key": "CUSTOM", "label": "AC hall" }]
+  facilities String?
+  photos    BranchPhoto[]
   createdAt DateTime  @default(now())
   students  Student[]
   batches   Batch[]
@@ -66,6 +69,19 @@ model Batch {
   attendance Attendance[]
   notices    Notice[]
   createdAt  DateTime     @default(now())
+}
+
+// Photo of a branch's facilities (nets, ground…), shown in the parent app. Resized in the browser before upload.
+model BranchPhoto {
+  id        String   @id @default(cuid())
+  branchId  String
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+  caption   String?
+  createdAt DateTime @default(now())
+
+  @@index([branchId])
 }
 
 // Announcement shown in the parent app (and shareable on WhatsApp).

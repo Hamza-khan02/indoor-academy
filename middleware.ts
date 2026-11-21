@@ -21,7 +21,7 @@ export async function middleware(req: NextRequest) {
   const session = token ? await verifySession(token) : null;
 
   // Student photos are shown in both apps; the route itself checks who may see which photo.
-  if (pathname.startsWith('/api/photo/')) {
+  if (pathname.startsWith('/api/photo/') || pathname.startsWith('/api/branch-photo/')) {
     const parentToken = req.cookies.get(PARENT_COOKIE)?.value;
     if (session || (parentToken && (await verifyParentSession(parentToken)))) return NextResponse.next();
     return new NextResponse('Not found', { status: 404 });
