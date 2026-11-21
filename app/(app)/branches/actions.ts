@@ -4,11 +4,17 @@ import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { actionAdmin } from '@/lib/auth';
 import { FormError, run, text } from '@/lib/form';
+import { isGoogleMapsUrl } from '@/lib/maps';
 
 function parseBranch(fd: FormData) {
+  const mapsUrl = text(fd, 'mapsUrl', { label: 'Google Maps link', max: 300 });
+  if (mapsUrl && !isGoogleMapsUrl(mapsUrl)) {
+    throw new FormError('Paste a Google Maps link (Google Maps → Share → Copy link), e.g. https://maps.app.goo.gl/…');
+  }
   return {
     name: text(fd, 'name', { required: true, label: 'Branch name', max: 60 }),
     address: text(fd, 'address', { label: 'Address', max: 200 }),
+    mapsUrl,
   };
 }
 

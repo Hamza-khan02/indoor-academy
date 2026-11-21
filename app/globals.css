@@ -592,6 +592,25 @@ a.player-cell:hover b { color:#ff8a8a }
   .cc-two { grid-template-columns:1fr }
 }
 
+/* ---------- Notices ---------- */
+.notice-list { display:grid; gap:12px; margin-bottom:12px }
+.notice-card.pinned { border-color:#4a2228; background:linear-gradient(150deg,#1c1416,#141418) }
+.notice-card.expired { opacity:.6 }
+.notice-head h3 { font:600 15px 'Space Grotesk'; margin:0; display:flex; align-items:center; gap:6px }
+.notice-head p { margin:5px 0 0; font-size:10px }
+.notice-body { white-space:pre-wrap; font-size:13px; line-height:1.6; color:#d4d4d8; margin:12px 0 0 }
+.pin-icon { color:#f87171; flex-shrink:0 }
+.history summary { display:flex; align-items:center; gap:6px }
+.portal-notices { margin-bottom:14px; border-color:#3b2428 }
+.portal-notices h3 { display:flex; align-items:center; gap:7px }
+.portal-notices ul { list-style:none; margin:0; padding:0 }
+.portal-notices li { padding:12px 0; border-top:1px solid #25252b }
+.portal-notices li:first-child { border-top:0; padding-top:0 }
+.notice-title { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:13px }
+.notice-title small { margin-left:auto; font-size:10px }
+.portal-notices .notice-body { margin-top:6px; font-size:12px }
+.new-tag { font-size:9px; font-weight:700; background:#ef4444; color:#fff; padding:2px 6px; border-radius:5px; letter-spacing:.4px }
+
 /* ---------- Responsive ---------- */
 @media (max-width:1200px) {
   .content { padding:27px 24px }
@@ -643,3 +662,8 @@ a.player-cell:hover b { color:#ff8a8a }
   .receipt-meta { text-align:left }
   .receipt-meta dl { justify-content:start }
 }
+
+/* ---------- Branch maps ---------- */
+.map-link { margin-top:6px; font-size:10px }
+.directions-btn { margin-top:12px; width:100%; justify-content:center; height:36px; font-size:11px; border-color:#1f3d5a; background:#13202d; color:#93c5fd }
+.directions-btn:hover { background:#18293a; color:#bfdbfe }

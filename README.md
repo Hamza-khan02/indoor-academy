@@ -24,7 +24,7 @@ Running `npm run setup` again is safe: it never overwrites real values in `.env`
 
 **Moving data from another computer:** copy both `.env` and `prisma/dev.db` from the old computer into the same places, then run `npm install` and `npm run setup`. Log in with the old admin account.
 
-The seed creates the admin user and three branches (Sultanpur Main, North and South). Rename or delete them from **Branches**. No sample students or payments are created, so every number on the dashboard comes from data you enter.
+The seed creates the admin user, the academy's two branches (**Sultanpur City** — Pausahal Road, and **Aliganj Bazar** — Nirman Public School), coach **Aftab Khan**, and the academy phone/address used on receipts. Add the upcoming third branch from **Branches** when it opens. No sample students or payments are created, so every number on the dashboard comes from data you enter.
 
 > **Security note:** the project uses Next.js 14.2.35, the last 14.x release. Some advisories are only fixed in Next.js 15/16; plan that upgrade before putting the app on the internet.
 
@@ -85,6 +85,15 @@ Each student can have a profile photo, shown on their profile, in the student li
 - The profile shows when the photo was last changed and by whom ("Parent / student" or the staff member's name), so staff can remove an unsuitable photo.
 - Photos are cropped to a square and shrunk to about 20–40 KB in the browser before upload; the server accepts only real JPG, PNG or WebP files up to 300 KB. They are stored inside the database, so they move with `prisma/dev.db` and backups.
 - A photo is only visible to staff and to that student's own family.
+
+## Notice board
+
+**Notices** (left menu) holds announcements for families: holidays, timing changes, tournament news, fee dates.
+
+- Choose who sees it: **all families**, **one branch** or **one batch**. Optional **Show until** date hides it from parents after that day; **Pin to the top** keeps it first.
+- Notices appear at the top of the parent app for the families they are aimed at, newest first, with a *New* tag for 3 days.
+- **Share on WhatsApp** opens WhatsApp with the notice typed in (bold title) so you can pick a group or contact; **Copy** copies the same text. If the app's public address is set (Settings → Parent app), the parent app link is added.
+- Admins and coaches can post and edit notices; admins can delete any notice, others only their own. Ended notices stay listed under *Ended notices*.
 
 ## Matches & career stats
 

@@ -28,7 +28,8 @@ export function text(fd: FormData, key: string, opts: TextOpts & { required: tru
 export function text(fd: FormData, key: string, opts?: TextOpts): string | null;
 export function text(fd: FormData, key: string, { required = false, label = key, max = 200 }: TextOpts = {}) {
   const raw = fd.get(key);
-  const value = typeof raw === 'string' ? raw.trim() : '';
+  // Browsers send line breaks as \r\n; store plain \n.
+  const value = typeof raw === 'string' ? raw.trim().replace(/\r\n?/g, '\n') : '';
   if (!value) {
     if (required) throw new FormError(`${label} is required.`);
     return null;

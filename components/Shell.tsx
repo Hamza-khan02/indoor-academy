@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   Activity, CalendarDays, ChartNoAxesCombined, ChevronRight, CircleDollarSign, ClipboardCheck, LayoutDashboard,
-  LogOut, MapPin, Menu, Search, Settings, Swords, Trophy, UserRound, Users, X,
+  LogOut, MapPin, Megaphone, Menu, Search, Settings, Swords, Trophy, UserRound, Users, X,
 } from 'lucide-react';
 import { logout } from '@/app/login/actions';
 import { initials } from '@/lib/format';
@@ -18,6 +18,7 @@ const WORKSPACE = [
   { href: '/coaches', label: 'Coaches', icon: UserRound },
   { href: '/batches', label: 'Batches & Sessions', icon: CalendarDays },
   { href: '/attendance', label: 'Attendance', icon: ClipboardCheck },
+  { href: '/notices', label: 'Notices', icon: Megaphone },
   { href: '/fees', label: 'Fees & Finance', icon: CircleDollarSign, adminOnly: true },
   { href: '/performance', label: 'Performance', icon: ChartNoAxesCombined },
   { href: '/matches', label: 'Matches', icon: Swords },

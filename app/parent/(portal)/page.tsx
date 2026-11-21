@@ -1,7 +1,9 @@
 import Link from 'next/link';
-import { CalendarDays, Clock3, FileText, MapPin, Trophy, UserRound } from 'lucide-react';
+import { CalendarDays, Clock3, FileText, MapPin, Megaphone, Pin, Trophy, UserRound } from 'lucide-react';
 import { db } from '@/lib/db';
 import { requireFamily } from '@/lib/family';
+import { noticesForStudent } from '@/lib/notices';
+import { directionsUrl } from '@/lib/maps';
 import { ATTENDANCE_STATUS, DAYS, PAYMENT_METHODS, SQUAD_ROLES, TOURNAMENT_STATUS } from '@/lib/constants';
 import { MatchRecord } from '@/components/MatchRecord';
 import { addDays, currentMonth, formatDate, formatLongDate, formatTime, monthLabel, todayISO, weekdayShort } from '@/lib/dates';
@@ -46,7 +48,7 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
     where: { id: childId },
     include: {
       batch: { include: { coach: { select: { name: true } } } },
-      branch: { select: { name: true } },
+      branch: { select: { name: true, address: true, mapsUrl: true } },
       attendance: { orderBy: { date: 'desc' }, take: 60, select: { id: true, date: true, status: true } },
       payments: { orderBy: [{ paidOn: 'desc' }, { createdAt: 'desc' }], select: { id: true, amount: true, forMonth: true, paidOn: true, receiptNo: true, method: true } },
       assessments: { orderBy: [{ date: 'desc' }, { createdAt: 'desc' }], take: 20 },
@@ -66,6 +68,13 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
     take: 10,
   });
   const selectedRole = new Map(student.squads.map((s) => [s.tournamentId, s.role]));
+  const notices = await db.notice.findMany({
+    where: noticesForStudent(student, today),
+    orderBy: [{ pinned: 'desc' }, { createdAt: 'desc' }],
+    take: 10,
+    select: { id: true, title: true, body: true, pinned: true, createdAt: true },
+  });
+  const isNew = (d: Date) => Date.now() - d.getTime() < 3 * 24 * 60 * 60 * 1000;
 
   const batchDays = student.batch?.days.split(',') ?? [];
   const next = student.batch?.active ? nextSession(batchDays, today) : null;
@@ -112,6 +121,25 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
         </div>
       ))}
 
+      {notices.length > 0 && (
+        <section className="panel padded portal-notices">
+          <div className="panel-head"><div><h3><Megaphone size={15} /> Notices</h3></div></div>
+          <ul>
+            {notices.map((n) => (
+              <li key={n.id} className={n.pinned ? 'pinned' : ''}>
+                <div className="notice-title">
+                  {n.pinned && <Pin size={13} className="pin-icon" />}
+                  <b>{n.title}</b>
+                  {isNew(n.createdAt) && <span className="new-tag">New</span>}
+                  <small className="muted">{formatDate(todayISO(n.createdAt))}</small>
+                </div>
+                <p className="notice-body">{n.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="portal-grid">
         <Panel title="Training schedule" subtitle={student.batch ? `${student.batch.name} · ${student.batch.ageGroup}` : undefined}>
           {!student.batch ? <Empty title="Not assigned to a batch yet" /> : (
@@ -130,9 +158,14 @@ export default async function ParentHome({ searchParams }: { searchParams: { chi
               </div>
               <ul className="meta-list">
                 <li><Clock3 size={14} /> {formatTime(student.batch.startTime)} – {formatTime(student.batch.endTime)}</li>
-                <li><MapPin size={14} /> {student.batch.venue ? `${student.batch.venue}, ` : ''}{student.branch.name}</li>
+                <li><MapPin size={14} /> <span>{student.batch.venue ? `${student.batch.venue}, ` : ''}{student.branch.name}{student.branch.address && <small className="muted block">{student.branch.address}</small>}</span></li>
                 <li><UserRound size={14} /> {student.batch.coach ? `Coach ${student.batch.coach.name}` : 'Coach not assigned yet'}</li>
               </ul>
+              {directionsUrl(student.branch) && (
+                <a className="wa-btn directions-btn" href={directionsUrl(student.branch)!} target="_blank" rel="noopener noreferrer">
+                  <MapPin size={14} /> Directions to {student.branch.name}
+                </a>
+              )}
             </>
           )}
         </Panel>

@@ -1,4 +1,5 @@
-import { Pencil, Plus, Trash2 } from 'lucide-react';
+import { MapPin, Pencil, Plus, Trash2 } from 'lucide-react';
+import { directionsUrl } from '@/lib/maps';
 import { db } from '@/lib/db';
 import { requireAdminPage } from '@/lib/auth';
 import { addDays, todayISO } from '@/lib/dates';
@@ -9,11 +10,13 @@ import { ConfirmAction } from '@/components/ConfirmAction';
 import { AttendanceBar, Empty, PageHeader } from '@/components/ui';
 import { createBranch, deleteBranch, updateBranch } from './actions';
 
-function BranchFields({ branch }: { branch?: { name: string; address: string | null } }) {
+function BranchFields({ branch }: { branch?: { name: string; address: string | null; mapsUrl: string | null } }) {
   return (
     <>
-      <label>Branch name *<input name="name" required maxLength={60} defaultValue={branch?.name} placeholder="e.g. Sultanpur · Main" /></label>
-      <label>Address<textarea name="address" rows={2} maxLength={200} defaultValue={branch?.address ?? ''} /></label>
+      <label>Branch name *<input name="name" required maxLength={60} defaultValue={branch?.name} placeholder="e.g. Sultanpur City" /></label>
+      <label>Address<textarea name="address" rows={2} maxLength={200} defaultValue={branch?.address ?? ''} placeholder="Road, landmark, city, PIN" /></label>
+      <label>Google Maps link<input name="mapsUrl" type="url" maxLength={300} defaultValue={branch?.mapsUrl ?? ''} placeholder="https://maps.app.goo.gl/..." /></label>
+      <p className="form-hint">In Google Maps, open the place → <b>Share</b> → <b>Copy link</b>, and paste it here. Parents get a Directions button. Without a link, the address is searched on Google Maps.</p>
     </>
   );
 }
@@ -54,7 +57,7 @@ export default async function BranchesPage() {
             return (
               <article key={b.id} className="panel padded">
                 <div className="panel-head">
-                  <div><h3>{b.name}</h3><p>{b.address ?? 'No address added'}</p></div>
+                  <div><h3>{b.name}</h3><p>{b.address ?? 'No address added'}</p>{directionsUrl(b) && <a className="text-btn map-link" href={directionsUrl(b)!} target="_blank" rel="noopener noreferrer"><MapPin size={13} /> {b.mapsUrl ? 'Open in Google Maps' : 'Search address on Google Maps'}</a>}</div>
                   <div className="row-actions">
                     <FormModal title={`Edit ${b.name}`} trigger={<Pencil size={15} />} triggerClassName="icon-action" triggerLabel="Edit" action={updateBranch.bind(null, b.id)}>
                       <BranchFields branch={b} />
