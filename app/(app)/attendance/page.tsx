@@ -7,7 +7,8 @@ import { Empty, PageHeader, Panel } from '@/components/ui';
 import { AttendanceSheet } from './AttendanceSheet';
 import { saveAttendance } from './actions';
 
-export default async function AttendancePage({ searchParams }: { searchParams: { date?: string; batch?: string } }) {
+export default async function AttendancePage(props: { searchParams: Promise<{ date?: string; batch?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireUser();
   const today = todayISO();
   const valid = searchParams.date && /^\d{4}-\d{2}-\d{2}$/.test(searchParams.date) && searchParams.date <= today;

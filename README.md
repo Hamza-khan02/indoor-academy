@@ -1,10 +1,10 @@
 # INDOOR ACADEMY
 
-Management app for a cricket academy: students, coaches, batches, attendance, fees, performance assessments, tournaments, branches and reports. Built with Next.js 14.2 (App Router), Prisma and SQLite.
+Management app for a cricket academy: students, coaches, batches, attendance, fees, performance assessments, tournaments, branches and reports. Built with Next.js 16 (App Router), Prisma and SQLite.
 
 ## First-time setup (new computer)
 
-1. Install **Node.js** (LTS) from https://nodejs.org and **Git** from https://git-scm.com.
+1. Install **Node.js** (LTS, version 20.9 or newer) from https://nodejs.org and **Git** from https://git-scm.com.
 2. Download the project and open its folder:
    ```
    git clone https://github.com/Hamza-khan02/indoor-academy.git
@@ -26,7 +26,7 @@ Running `npm run setup` again is safe: it never overwrites real values in `.env`
 
 The seed creates the admin user, the academy's two branches (**Sultanpur City** — Pausahal Road, and **Aliganj Bazar** — Nirman Public School), coach **Aftab Khan**, and the academy phone/address used on receipts. Add the upcoming third branch from **Branches** when it opens. No sample students or payments are created, so every number on the dashboard comes from data you enter.
 
-> **Security note:** the project uses Next.js 14.2.35, the last 14.x release. Some advisories are only fixed in Next.js 15/16; plan that upgrade before putting the app on the internet.
+> **Keeping it secure:** the project uses Next.js 16, which receives security fixes. Every few weeks, stop the app and run `npm update` then `npm run build` to pick them up, especially once the app is on the internet.
 
 ## Getting started in the app
 
@@ -192,6 +192,7 @@ Administrators create logins from **Settings → Users**.
 |---|---|
 | `npm run dev` | Start the app for local use / development |
 | `npm run build` then `npm start` | Run an optimised production build |
+| `npm run start:live` | For hosting: apply database migrations, create the first admin if there is none, then start the production build |
 | `npm run setup` | Create `.env` if missing, apply database migrations, create the first admin (safe to re-run) |
 | `npm run db:migrate` | After changing `prisma/schema.prisma`, create and apply a migration |
 | `npm run db:studio` | Open Prisma Studio to browse the database |
@@ -205,6 +206,24 @@ Administrators create logins from **Settings → Users**.
 ## Running on a local network
 
 `npm run dev` works on other devices at `http://<your-computer-ip>:3000`. When using a production build (`npm start`) over plain `http` on a local network, set `COOKIE_SECURE="false"` in `.env`, otherwise browsers will refuse the login cookie. Leave it unset when the site is served over HTTPS.
+
+## Going live (putting the app on the internet)
+
+The app needs a host that runs **Node.js 20.9 or newer** all the time and serves it over **https**. Hosts differ in one thing that matters here: whether files survive a restart.
+
+- **Host with a persistent disk / volume** (the simple route): the database stays a single SQLite file, exactly as on your computer. Put it on the disk, e.g. `DATABASE_URL="file:/data/academy.db"`.
+- **Host without a disk** (most free "serverless" plans): files are wiped on every restart, so the database must move to PostgreSQL first (next section).
+
+Whichever host you choose:
+
+1. **Settings on the host** (environment variables): `DATABASE_URL`; `AUTH_SECRET` (a new long random value, at least 32 characters, never the one from your computer); `ADMIN_NAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first admin. Do **not** set `COOKIE_SECURE`.
+2. **Build command:** `npm install && npm run build`. **Start command:** `npm run start:live`. It applies database changes, creates the first admin, branches and coach if the database is empty, then starts the app on the port the host gives it.
+3. **After the first start:** log in and change the admin password; fill in **Settings → Parent app** with the public address (so PIN messages carry the right link) and **Settings → Home page**; check the branches and the coach profile; then add students and send parents their PINs.
+4. **Backups:** download a copy of the database file (or use the host's volume backups) regularly. It holds everything, including photos.
+
+The live app starts with an empty database. To carry over what is on your computer, copy `prisma/dev.db` to the host's disk under the name used in `DATABASE_URL` before the first start.
+
+Search engines are told (in `/robots.txt`) to list only the home page and coach pages; everything behind a login stays out of search results.
 
 ## Moving to a hosted database
 
@@ -222,5 +241,5 @@ app/api/export/       CSV downloads
 components/           Shared UI (sidebar shell, modal form, toast, chart)
 lib/                  Database client, auth/session, dates (IST), validation, queries
 prisma/               Schema, migrations and seed script
-middleware.ts         Shows logged-out visitors the home page at "/", keeps /home/... public, and sends them to /login (staff) or /parent/login (parents) elsewhere
+proxy.ts              Runs before every request: shows logged-out visitors the home page at "/", keeps /home/... public, and sends them to /login (staff) or /parent/login (parents) elsewhere
 ```

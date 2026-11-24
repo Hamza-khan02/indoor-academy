@@ -6,12 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
     "postinstall": "prisma generate",
     "setup": "node scripts/setup.mjs",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "start:live": "prisma migrate deploy && prisma db seed && next start"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"
@@ -21,21 +21,24 @@
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.18",
     "lucide-react": "^0.468.0",
-    "next": "14.2.35",
+    "next": "^16.4.6",
     "prisma": "^6.19.3",
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "recharts": "^2.15.0"
   },
   "devDependencies": {
     "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "typescript": "^5"
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
   },
   "allowScripts": {
     "prisma@6.19.3": true,
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true
+  },
+  "overrides": {
+    "react-is": "^19.0.0"
   }
 }

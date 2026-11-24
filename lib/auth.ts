@@ -9,7 +9,7 @@ export type CurrentUser = { id: string; name: string; email: string; role: strin
 
 /** The logged-in user for this request, or null. Re-checked against the database every request. */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
-  const token = cookies().get(SESSION_COOKIE)?.value;
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const session = await verifySession(token);
   if (!session) return null;
@@ -48,7 +48,7 @@ export async function actionAdmin() {
 
 export async function startSession(user: { id: string; role: string }) {
   const token = await signSession({ uid: user.id, role: user.role });
-  cookies().set(SESSION_COOKIE, token, {
+  (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
     // HTTPS-only in production. Set COOKIE_SECURE="false" to run a production build
@@ -59,6 +59,6 @@ export async function startSession(user: { id: string; role: string }) {
   });
 }
 
-export function endSession() {
-  cookies().delete(SESSION_COOKIE);
+export async function endSession() {
+  (await cookies()).delete(SESSION_COOKIE);
 }

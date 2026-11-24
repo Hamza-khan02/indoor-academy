@@ -14,7 +14,8 @@ import { createStudent, deleteStudent, updateStudent } from './actions';
 
 type Search = { q?: string; branch?: string; batch?: string; status?: string };
 
-export default async function StudentsPage({ searchParams }: { searchParams: Search }) {
+export default async function StudentsPage(props: { searchParams: Promise<Search> }) {
+  const searchParams = await props.searchParams;
   const user = await requireUser();
   const isAdmin = user.role === 'ADMIN';
   const q = searchParams.q?.trim() ?? '';

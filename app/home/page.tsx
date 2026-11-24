@@ -1,4 +1,4 @@
-// Public home page. Open to everyone: logged-out visitors also see it at "/" (see middleware.ts).
+// Public home page. Open to everyone: logged-out visitors also see it at "/" (see proxy.ts).
 // Shows only public details: academy contact, branches, facilities, batch timings and coaches' public profiles.
 // No student data, fees or branch photos (those stay behind the staff and parent logins).
 import './home.css';

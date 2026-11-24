@@ -11,12 +11,14 @@ import { PrintButton } from './PrintButton';
 
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const p = await db.feePayment.findUnique({ where: { id: params.id }, select: { receiptNo: true, student: { select: { name: true } } } });
   return { title: p ? `Receipt ${p.receiptNo ?? ''} – ${p.student.name}` : 'Receipt' };
 }
 
-export default async function ReceiptPage({ params }: { params: { id: string } }) {
+export default async function ReceiptPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requireAdminPage();
   const payment = await db.feePayment.findUnique({
     where: { id: params.id },

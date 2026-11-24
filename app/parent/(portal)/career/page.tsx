@@ -5,7 +5,8 @@ import { loadCareer } from '@/lib/career';
 import { CareerView } from '@/components/career/CareerView';
 import { Empty } from '@/components/ui';
 
-export default async function ParentCareerPage({ searchParams }: { searchParams: { child?: string } }) {
+export default async function ParentCareerPage(props: { searchParams: Promise<{ child?: string }> }) {
+  const searchParams = await props.searchParams;
   const family = await requireFamily();
   // Only the family's own children can be opened.
   const child = family.students.find((s) => s.id === searchParams.child) ?? family.students[0];

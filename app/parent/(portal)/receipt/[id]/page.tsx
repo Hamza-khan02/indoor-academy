@@ -8,7 +8,8 @@ import { getSettings } from '@/lib/settings';
 import { ReceiptView } from '@/components/ReceiptView';
 import { PrintButton } from '@/app/receipt/[id]/PrintButton';
 
-export default async function ParentReceiptPage({ params }: { params: { id: string } }) {
+export default async function ParentReceiptPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const family = await requireFamily();
   const payment = await db.feePayment.findUnique({
     where: { id: params.id },

@@ -9,7 +9,8 @@ import { photoUrl } from '@/lib/photos';
 import { Avatar, Empty, Panel } from '@/components/ui';
 
 /** Who has done a drill and who hasn't, with their notes. */
-export default async function DrillPage({ params }: { params: { id: string } }) {
+export default async function DrillPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requireUser();
   const d = await db.drill.findUnique({
     where: { id: params.id },

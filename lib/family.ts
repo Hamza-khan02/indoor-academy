@@ -28,7 +28,7 @@ export function displayPhone(key: string) {
 
 /** The logged-in family for this request (login + their students), or null. */
 export const getFamily = cache(async () => {
-  const token = cookies().get(PARENT_COOKIE)?.value;
+  const token = (await cookies()).get(PARENT_COOKIE)?.value;
   if (!token) return null;
   const session = await verifyParentSession(token);
   if (!session) return null;
@@ -50,7 +50,7 @@ export async function requireFamily() {
 
 export async function startParentSession(login: { id: string; sessionVersion: number }) {
   const token = await signParentSession({ fid: login.id, v: login.sessionVersion });
-  cookies().set(PARENT_COOKIE, token, {
+  (await cookies()).set(PARENT_COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production' && process.env.COOKIE_SECURE !== 'false',
@@ -59,6 +59,6 @@ export async function startParentSession(login: { id: string; sessionVersion: nu
   });
 }
 
-export function endParentSession() {
-  cookies().delete(PARENT_COOKIE);
+export async function endParentSession() {
+  (await cookies()).delete(PARENT_COOKIE);
 }

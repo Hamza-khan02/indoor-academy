@@ -45,6 +45,6 @@ export async function parentLogin(fd: FormData): Promise<ActionResult> {
 }
 
 export async function parentLogout() {
-  endParentSession();
+  await endParentSession();
   redirect('/parent/login');
 }

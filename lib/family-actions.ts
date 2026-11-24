@@ -29,7 +29,7 @@ async function portalLoginUrl() {
   const settings = await getSettings();
   let base = settings.publicUrl;
   if (!base) {
-    const h = headers();
+    const h = await headers();
     const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000';
     const proto = h.get('x-forwarded-proto') ?? 'http';
     base = `${proto}://${host}`;

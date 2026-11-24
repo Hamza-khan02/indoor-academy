@@ -7,7 +7,8 @@ import { CareerCard } from '@/components/career/CareerCard';
 import { Empty } from '@/components/ui';
 import { PrintButton } from '@/app/receipt/[id]/PrintButton';
 
-export default async function ParentCareerCard({ searchParams }: { searchParams: { child?: string } }) {
+export default async function ParentCareerCard(props: { searchParams: Promise<{ child?: string }> }) {
+  const searchParams = await props.searchParams;
   const family = await requireFamily();
   const child = family.students.find((s) => s.id === searchParams.child) ?? family.students[0];
   if (!child) return <article className="panel padded"><Empty title="No students linked to this phone number" /></article>;

@@ -9,7 +9,8 @@ import { Empty } from '@/components/ui';
 import { PrintButton } from '@/app/receipt/[id]/PrintButton';
 
 /** Parent app: monthly report for one of the family's own children. */
-export default async function ParentReportPage({ searchParams }: { searchParams: { child?: string; month?: string } }) {
+export default async function ParentReportPage(props: { searchParams: Promise<{ child?: string; month?: string }> }) {
+  const searchParams = await props.searchParams;
   const family = await requireFamily();
   const child = family.students.find((s) => s.id === searchParams.child) ?? family.students[0];
   if (!child) return <article className="panel padded"><Empty title="No students linked to this phone number" /></article>;

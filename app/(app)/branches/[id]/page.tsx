@@ -12,7 +12,8 @@ import { FacilityChips, PhotoGrid } from '@/components/Facilities';
 import { Empty, Panel } from '@/components/ui';
 import { deleteBranchPhoto, saveFacilities, uploadBranchPhoto } from '../facility-actions';
 
-export default async function BranchPage({ params }: { params: { id: string } }) {
+export default async function BranchPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requireAdminPage();
   const branch = await db.branch.findUnique({
     where: { id: params.id },

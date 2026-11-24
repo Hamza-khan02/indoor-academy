@@ -15,7 +15,8 @@ import { deleteMatch, saveScorecard, updateMatch } from '../actions';
 
 const str = (n: number) => (n ? String(n) : '');
 
-export default async function MatchPage({ params }: { params: { id: string } }) {
+export default async function MatchPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const user = await requireUser();
   const match = await db.match.findUnique({
     where: { id: params.id },

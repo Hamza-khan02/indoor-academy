@@ -31,7 +31,8 @@ function nextSession(days: string[], today: string) {
   return null;
 }
 
-export default async function ParentHome({ searchParams }: { searchParams: { child?: string } }) {
+export default async function ParentHome(props: { searchParams: Promise<{ child?: string }> }) {
+  const searchParams = await props.searchParams;
   const family = await requireFamily();
   if (family.students.length === 0) {
     return (

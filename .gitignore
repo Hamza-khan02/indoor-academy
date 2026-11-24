@@ -5,3 +5,6 @@ prisma/*.db
 prisma/*.db-journal
 *.tsbuildinfo
 .next-test
+
+# Written by Next.js on every dev / build run
+next-env.d.ts

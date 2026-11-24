@@ -16,7 +16,8 @@ function defaultMonth() {
   return Number(todayISO().slice(8)) <= 7 ? addMonths(currentMonth(), -1) : currentMonth();
 }
 
-export default async function ProgressPage({ searchParams }: { searchParams: { month?: string; batch?: string } }) {
+export default async function ProgressPage(props: { searchParams: Promise<{ month?: string; batch?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireUser();
   const month = isValidMonth(searchParams.month) ? searchParams.month : defaultMonth();
   const range = { gte: `${month}-01`, lte: `${month}-31` };

@@ -41,6 +41,6 @@ export async function login(fd: FormData): Promise<ActionResult> {
 }
 
 export async function logout() {
-  endSession();
+  await endSession();
   redirect('/login');
 }

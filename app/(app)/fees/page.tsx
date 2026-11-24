@@ -15,7 +15,8 @@ import { PaymentFields } from './PaymentFields';
 import { deletePayment, recordPayment } from './actions';
 import { CircleDollarSign, Clock3, Users, Wallet } from 'lucide-react';
 
-export default async function FeesPage({ searchParams }: { searchParams: { month?: string; show?: string } }) {
+export default async function FeesPage(props: { searchParams: Promise<{ month?: string; show?: string }> }) {
+  const searchParams = await props.searchParams;
   await requireAdminPage();
   const month = searchParams.month && /^\d{4}-\d{2}$/.test(searchParams.month) ? searchParams.month : currentMonth();
   const showAll = searchParams.show === 'all';

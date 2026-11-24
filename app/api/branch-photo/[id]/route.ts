@@ -6,7 +6,8 @@ import { getFamily } from '@/lib/family';
 export const dynamic = 'force-dynamic';
 
 /** A branch facility photo. Visible to staff and to any logged-in family. */
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const allowed = Boolean(await getCurrentUser()) || Boolean(await getFamily());
   if (!allowed) return new NextResponse('Not found', { status: 404 });
   const photo = await db.branchPhoto.findUnique({ where: { id: params.id } });

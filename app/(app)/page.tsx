@@ -20,7 +20,8 @@ function diffTrend(now: number | null, before: number | null, unit: string): Tre
   return { text: `${d > 0 ? '+' : ''}${d}${unit}`, direction: d > 0 ? 'up' : 'down' };
 }
 
-export default async function OverviewPage({ searchParams }: { searchParams: { range?: string; denied?: string } }) {
+export default async function OverviewPage(props: { searchParams: Promise<{ range?: string; denied?: string }> }) {
+  const searchParams = await props.searchParams;
   const user = await requireUser();
   const isAdmin = user.role === 'ADMIN';
   const today = todayISO();

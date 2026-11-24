@@ -1,16 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { PARENT_COOKIE, SESSION_COOKIE, verifyParentSession, verifySession } from './lib/session';
 
+// Runs before every request (Next.js calls this file "proxy"; before version 16 it was "middleware").
 // Three areas:
 //  - /home, /home/...  the public home page and coach pages (no login). Logged-out visitors also get the home page at "/".
 //  - /parent/...  the parent / student app (needs a parent login, except /parent/login)
 //  - everything else  the staff app (needs a staff login, except /login)
 // Pages and actions also re-check the session against the database.
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  // Public pages, and coach photos shown on them (the photo route only serves active coaches to visitors).
-  if (pathname === '/home' || pathname.startsWith('/home/') || pathname.startsWith('/api/coach-photo/')) return NextResponse.next();
+  // Public pages, coach photos shown on them (the photo route only serves active coaches to visitors),
+  // and the rules for search engines.
+  if (pathname === '/home' || pathname.startsWith('/home/') || pathname.startsWith('/api/coach-photo/') || pathname === '/robots.txt') {
+    return NextResponse.next();
+  }
 
   if (pathname === '/parent' || pathname.startsWith('/parent/')) {
     if (pathname === '/parent/login') return NextResponse.next();

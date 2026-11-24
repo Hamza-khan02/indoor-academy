@@ -11,7 +11,8 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Career card' };
 
 /** Printable career card for staff (outside the sidebar layout so it prints cleanly). */
-export default async function StaffCareerCard({ params }: { params: { id: string } }) {
+export default async function StaffCareerCard(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requireUser();
   const [data, settings] = await Promise.all([loadCareer(params.id), getSettings()]);
   if (!data) notFound();

@@ -6,7 +6,8 @@ import { getFamily } from '@/lib/family';
 export const dynamic = 'force-dynamic';
 
 /** A student's profile photo. Visible to staff, and to the student's own family in the parent app. */
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   let allowed = Boolean(await getCurrentUser());
   if (!allowed) {
     const family = await getFamily();

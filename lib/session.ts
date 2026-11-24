@@ -1,4 +1,4 @@
-// Signed session token. Kept free of Node-only imports so middleware (edge runtime) can use it.
+// Signed session token. Kept free of database imports so proxy.ts (which runs before every request) can use it.
 import { SignJWT, jwtVerify } from 'jose';
 
 export const SESSION_COOKIE = 'ia_session';

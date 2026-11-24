@@ -43,7 +43,8 @@ async function build(type: string) {
   return null;
 }
 
-export async function GET(_req: Request, { params }: { params: { type: string } }) {
+export async function GET(_req: Request, props: { params: Promise<{ type: string }> }) {
+  const params = await props.params;
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: 'Not logged in' }, { status: 401 });
   if (user.role !== 'ADMIN') return NextResponse.json({ error: 'Administrators only' }, { status: 403 });

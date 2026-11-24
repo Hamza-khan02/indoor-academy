@@ -26,7 +26,8 @@ import { deletePayment, recordPayment } from '../../fees/actions';
 import { AssessmentFields } from '../../performance/AssessmentFields';
 import { addAssessment, deleteAssessment } from '../../performance/actions';
 
-export default async function StudentPage({ params }: { params: { id: string } }) {
+export default async function StudentPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const user = await requireUser();
   const isAdmin = user.role === 'ADMIN';
   const student = await db.student.findUnique({

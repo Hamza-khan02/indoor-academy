@@ -6,7 +6,8 @@ import { LoginForm } from './LoginForm';
 export const metadata = { title: 'Log in | INDOOR ACADEMY' };
 export const dynamic = 'force-dynamic';
 
-export default async function LoginPage({ searchParams }: { searchParams: { next?: string } }) {
+export default async function LoginPage(props: { searchParams: Promise<{ next?: string }> }) {
+  const searchParams = await props.searchParams;
   // Only allow redirects back into this app.
   const next = searchParams.next && searchParams.next.startsWith('/') && !searchParams.next.startsWith('//') ? searchParams.next : '/';
   if (await getCurrentUser()) redirect(next);

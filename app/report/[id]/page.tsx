@@ -15,7 +15,9 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Progress report' };
 
 /** Printable monthly report for staff, with comment editing and WhatsApp send (toolbar hidden when printing). */
-export default async function StaffReportPage({ params, searchParams }: { params: { id: string }; searchParams: { month?: string } }) {
+export default async function StaffReportPage(props: { params: Promise<{ id: string }>; searchParams: Promise<{ month?: string }> }) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
   await requireUser();
   const month = isValidMonth(searchParams.month) ? searchParams.month : currentMonth();
   const [r, settings] = await Promise.all([loadMonthlyReport(params.id, month), getSettings()]);

@@ -5,7 +5,8 @@ import { requireUser } from '@/lib/auth';
 import { loadCareer } from '@/lib/career';
 import { CareerView } from '@/components/career/CareerView';
 
-export default async function StudentCareerPage({ params }: { params: { id: string } }) {
+export default async function StudentCareerPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requireUser();
   const data = await loadCareer(params.id);
   if (!data) notFound();

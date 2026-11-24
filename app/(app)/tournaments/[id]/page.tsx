@@ -9,7 +9,8 @@ import { Empty, Panel, StatusPill } from '@/components/ui';
 import { SquadEditor } from '../SquadEditor';
 import { saveSquad } from '../actions';
 
-export default async function TournamentPage({ params }: { params: { id: string } }) {
+export default async function TournamentPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   await requireUser();
   const t = await db.tournament.findUnique({
     where: { id: params.id },
