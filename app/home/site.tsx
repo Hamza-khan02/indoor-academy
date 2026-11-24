@@ -45,6 +45,7 @@ export const loadSite = cache(async () => {
     getCurrentUser(),
     getFamily(),
   ]);
+  const bookable = (await db.rentalFacility.count({ where: { status: 'ACTIVE' } })) > 0;
 
   const academy = settings.academyName.trim() || 'INDOOR ACADEMY';
   const phoneKey = whatsappNumber(settings.academyPhone);
@@ -56,6 +57,8 @@ export const loadSite = cache(async () => {
     branches,
     coaches,
     isStaff: Boolean(user),
+    /** Online booking is open: at least one facility can be booked. */
+    bookable,
     phone: settings.academyPhone,
     callHref: phoneKey ? `tel:+${phoneKey}` : null,
     phoneText: phoneKey ? displayPhone(phoneKey) : '',
@@ -79,6 +82,7 @@ export function siteSections(site: Site, base = '') {
     { href: `${base}#progress`, label: 'Progress' },
     site.branches.length > 0 && { href: `${base}#branches`, label: 'Branches' },
     site.coaches.length > 0 && { href: `${base}#coaches`, label: 'Coaches' },
+    site.bookable && { href: '/book', label: 'Book online' },
     { href: `${base}#contact`, label: 'Contact' },
   ].filter(Boolean) as { href: string; label: string }[];
 }

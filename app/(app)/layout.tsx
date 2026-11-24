@@ -1,11 +1,11 @@
 import { Shell } from '@/components/Shell';
-import { requireUser } from '@/lib/auth';
+import { requireStaff } from '@/lib/auth';
 import { db } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const user = await requireUser();
+  const user = await requireStaff(); // each page then checks what this role may open
   const [studentCount, branchCount] = await Promise.all([
     db.student.count({ where: { status: { not: 'INACTIVE' } } }),
     db.branch.count(),

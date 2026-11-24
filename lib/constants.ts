@@ -7,7 +7,7 @@ export const STUDENT_STATUS: Record<string, string> = { ACTIVE: 'Active', REVIEW
 export const ATTENDANCE_STATUS: Record<string, string> = { PRESENT: 'Present', LATE: 'Late', ABSENT: 'Absent' };
 export const PAYMENT_METHODS: Record<string, string> = { CASH: 'Cash', UPI: 'UPI', CARD: 'Card', BANK: 'Bank transfer' };
 export const TOURNAMENT_STATUS: Record<string, string> = { UPCOMING: 'Upcoming', ONGOING: 'Ongoing', COMPLETED: 'Completed' };
-export const USER_ROLES: Record<string, string> = { ADMIN: 'Administrator', COACH: 'Coach' };
+export const USER_ROLES: Record<string, string> = { ADMIN: 'Administrator', COACH: 'Coach', RECEPTIONIST: 'Receptionist (bookings desk)' };
 
 export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 export const MATCH_TYPES: Record<string, string> = { PRACTICE: 'Practice match', FRIENDLY: 'Friendly', TOURNAMENT: 'Tournament', LEAGUE: 'League' };

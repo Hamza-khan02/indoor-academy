@@ -1,6 +1,6 @@
 import { KeyRound, Pencil, Plus, Power, PowerOff, Trash2 } from 'lucide-react';
 import { db } from '@/lib/db';
-import { requireUser } from '@/lib/auth';
+import { requireStaff } from '@/lib/auth';
 import { USER_ROLES } from '@/lib/constants';
 import { formatDate, todayISO } from '@/lib/dates';
 import { displayPhone, ensurePhoneKeys } from '@/lib/family';
@@ -16,7 +16,7 @@ import { changePassword, createUser, deleteUser, resetPassword } from './actions
 import { MessageTemplates } from './MessageTemplates';
 
 export default async function SettingsPage() {
-  const me = await requireUser();
+  const me = await requireStaff();
   const isAdmin = me.role === 'ADMIN';
   const [users, messageSettings] = isAdmin
     ? await Promise.all([
@@ -63,7 +63,7 @@ export default async function SettingsPage() {
         {isAdmin && (
           <Panel
             title="Users"
-            subtitle="Administrators can do everything. Coaches can manage students, attendance, assessments and tournaments, but not fees, branches, batches or users."
+            subtitle="Administrators can do everything. Coaches can manage students, attendance, assessments and tournaments, but not fees, branches, batches or users. Receptionists only work the bookings desk: create bookings, check customers in and record payments."
             action={
               <FormModal title="Add user" eyebrow="ACCESS" trigger={<><Plus size={14} /> Add user</>} triggerClassName="text-btn" action={createUser} submitLabel="Create login">
                 <label>Name *<input name="name" required maxLength={80} /></label>

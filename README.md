@@ -1,6 +1,6 @@
 # INDOOR ACADEMY
 
-Management app for a cricket academy: students, coaches, batches, attendance, fees, performance assessments, tournaments, branches and reports. Built with Next.js 16 (App Router), Prisma and SQLite.
+Management app for a cricket academy: students, coaches, batches, attendance, fees, performance assessments, tournaments, branches and reports, with online booking of nets, turf, bowling machines and equipment. Built with Next.js 16 (App Router), Prisma and SQLite.
 
 ## First-time setup (new computer)
 
@@ -56,6 +56,91 @@ Each active coach's card on the home page opens that coach's own public page (`/
 - The ↗ icon next to **Edit profile** opens the public page. Inactive coaches have no public page.
 - The coach's phone and email are never shown. **Enquire on WhatsApp** and **Call** on the page go to the academy's number.
 - Coach photos are public (unlike student and branch photos), because they are on the home page.
+
+## Bookings & rentals
+
+Customers book cricket nets, turf, practice pitches, bowling machines and equipment at **`/book`**. Staff run it from **Bookings & rentals** in the left menu. It uses the same database and logins as the rest of the app.
+
+### Setting it up (administrator)
+
+1. **Facilities → Add facility**: name, type (nets, turf / ground, practice pitch, bowling machine, equipment rental), number of units, opening hours, slot length, longest booking and capacity. A new facility starts **switched off**.
+2. **Pricing → Edit prices**: how it is charged (per 30 minutes, per hour, per session, per day; equipment is per item), the price for outside customers, the academy student discount, peak-hour and weekend extras, the refundable security deposit and the cancellation charge. Nothing is priced in the code: bookings are always priced from these saved values.
+3. **Bowling machines**: each machine's unique ID, speed range, bowling modes and maintenance state, plus the rental packages. The five standard packages (machine only, machine + net, machine + operator, machine + balls, complete) are created with the facility, switched off until you price them. A package with a net must say which nets facility the net comes from.
+4. **Equipment**: bats, balls, pads, gloves, helmets, stumps and other items, each with an ID, quantity, condition and rental price. Add a facility of type *Equipment rental* to let customers rent items on their own.
+5. Open the facility: its page → **Status → Open for booking** (refused until a price is set). Use **Block time** for maintenance or closed dates, or the Status button to put the whole facility under maintenance.
+6. **Settings**: how far ahead customers can book, the advance needed to confirm, how long an unpaid slot is held, reschedule rules, the reminder time and the UPI ID for counter payments.
+
+### Who books, and how
+
+- **Outside customers** register at `/book/register` with their name, mobile number and a password. No admission is needed. Forgotten password: an administrator sets a new one under **Customers**.
+- **Academy families** log in on the booking site with their parent app phone number and PIN. They choose which child the booking is for and get the student price automatically. A number that belongs to an academy family cannot open a second, outside account.
+- **Staff** enter walk-in and phone bookings with **New booking** (or by clicking a free slot on the calendar), picking a student to apply the student price. Money received can be recorded in the same step.
+
+The booking form shows the free slots and the price, with a promo code box. Customers can add equipment, pay online or at the academy, and afterwards open **My bookings** to see upcoming bookings and history, pay, download the receipt, reschedule, cancel or book the same thing again. Parents also see their child's bookings in the parent app.
+
+### How double booking is prevented
+
+Free slots shown in the browser are only a guide. When a booking is confirmed, the server checks the slot again and reserves it inside one database transaction, and booking transactions run one at a time. On top of that the database itself refuses a second holder of the same 15-minute block of a unit (the `ResourceSlot` table's primary key). A *machine + net* package reserves the machine and a net in that same transaction: both, or neither. Equipment is counted the same way, so more items than are in stock for that time cannot be reserved.
+
+### Booking statuses
+
+Pending approval → Payment pending → Confirmed → Checked in → In progress → Completed, with Cancelled, Rejected, Expired, No-show and Refunded as endings. Only the allowed moves work (for example a pending booking cannot be completed, and check-in is only possible on the day); the rest are refused on the server.
+
+- A facility marked *needs approval* gives **Pending approval** requests that staff approve or reject.
+- An online-payment booking is **Payment pending** and holds its slot for the time set in Settings; unpaid holds are released automatically (**Expired**).
+- Cancelling applies the facility's cancellation charge (never more than was paid); the rest becomes a refund for staff to pay.
+
+### Payments
+
+- **Offline** (cash, UPI QR, card, bank transfer): staff use **Record payment** on the booking. Each payment gets a receipt number like `IAR/2026-27/0001`.
+- **Online** (Razorpay: UPI, cards, net banking): switched on by adding these to `.env` on the server and restarting it:
+  ```
+  RAZORPAY_KEY_ID="..."
+  RAZORPAY_KEY_SECRET="..."
+  RAZORPAY_WEBHOOK_SECRET="..."
+  ```
+  In the Razorpay dashboard add the webhook address `https://<your address>/api/rentals/webhook` with the events `payment.captured`, `payment.failed` and `refund.processed`. A payment is counted only after the server has verified Razorpay's signature; what the browser reports is never trusted, and the secret key never reaches the browser. Until the keys are added, customers only see "Pay at the academy".
+- **Refunds** are listed under **Payments → Refunds to pay**. Mark one as paid with how the money went back, or send it back through Razorpay when the customer paid online. Use **Refund** on a completed booking to return a security deposit.
+- **Payments** also shows balances still to collect and the payment audit log. Every booking has an *Activity* list of who did what and when.
+
+### Equipment hand-over
+
+On the booking page: **Issue** (after check-in) → **Returned** → **Inspect**. Inspection puts good items back in stock, takes damaged ones out of service, removes missing ones from the stock count, and can add a charge to the booking. **Equipment** shows total, available, reserved, rented, waiting for inspection and damaged for every item, what is out and overdue, and every stock movement. A rental cannot be completed while its equipment is still out.
+
+### Calendar and reports
+
+- **Calendar**: daily (one column per unit), weekly and monthly views, filtered by facility. Green = available, red = booked, yellow = pending, grey = maintenance / blocked, blue = checked in. Click a free slot to book it, or a booking to open it.
+- **Reports**: daily and monthly bookings, facility-wise revenue, bowling machine revenue, equipment rental revenue, customer-wise history, payment collection, cancelled bookings and facility utilisation, for any date range, each with a CSV download for Excel.
+
+### Notifications
+
+Booking confirmation, payment confirmation, reminder, cancellation, rescheduling, equipment return reminder and refund confirmation are shown under **Messages** in the customer's booking account. They are also emailed when the customer has an email address and email is set up on the server:
+
+```
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="you@gmail.com"
+SMTP_PASS="an app password"
+SMTP_FROM="Indoor Academy <you@gmail.com>"
+```
+
+Every booking page also has **Send on WhatsApp** with the message typed in (the same free `wa.me` links as fee reminders). Expired holds are released whenever anyone books or opens the bookings section. For reminders to go out when nobody has the app open, set `CRON_SECRET` on the server and have the host call `/api/rentals/housekeeping?key=<CRON_SECRET>` every few minutes.
+
+### Who can do what
+
+| | Administrator | Receptionist | Coach | Customer / family |
+|---|---|---|---|---|
+| See the facility calendar | ✅ | ✅ | ✅ (no customer details) | own bookings only |
+| See bookings, create bookings, check customers in, record offline payments | ✅ | ✅ | ❌ | book and manage their own |
+| Approve / reject, cancel, reschedule, complete, equipment hand-over | ✅ | ❌ | ❌ | cancel / reschedule their own, within the rules |
+| Facilities, machines, equipment, prices, promo codes, settings, customers | ✅ | ❌ | ❌ | ❌ |
+| Refunds, payment audit log, reports and downloads | ✅ | ❌ | ❌ | ❌ |
+
+"Owner / Super Admin" and "Admin" are both the app's **Administrator** role. A **Receptionist** login (created under **Settings → Users**) opens only the bookings desk, not students, fees or attendance. These rules are checked on the server for every page and every action, not just by hiding buttons.
+
+### Database
+
+The module adds 17 tables (migration `20261124200000_booking_rentals`): `RentalFacility`, `RentalResource`, `RentalPricing`, `RentalPackage`, `RentalPromo`, `RentalCustomer`, `RentalBooking`, `BookingResource`, `ResourceSlot`, `FacilityBlockout`, `EquipmentItem`, `BookingEquipment`, `EquipmentMovement`, `RentalPayment`, `RentalRefund`, `RentalAuditLog` and `RentalNotification`. Existing tables are not changed. `npm run setup` applies it on any computer. The app talks to the database only from the server, so access is controlled there (there is no direct database access from browsers to protect with row-level security).
 
 ## WhatsApp reminders
 
@@ -184,7 +269,7 @@ Each student can have a blood group, an emergency contact (name and phone) and m
 | Create logins for other users | ✅ | ❌ |
 | Give / reset / switch off parent app PINs | ✅ | ❌ |
 
-Administrators create logins from **Settings → Users**.
+Administrators create logins from **Settings → Users**. A third role, **Receptionist**, only works the bookings desk (see *Bookings & rentals → Who can do what*).
 
 ## Useful commands
 
@@ -216,7 +301,7 @@ The app needs a host that runs **Node.js 20.9 or newer** all the time and serves
 
 Whichever host you choose:
 
-1. **Settings on the host** (environment variables): `DATABASE_URL`; `AUTH_SECRET` (a new long random value, at least 32 characters, never the one from your computer); `ADMIN_NAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first admin. Do **not** set `COOKIE_SECURE`.
+1. **Settings on the host** (environment variables): `DATABASE_URL`; `AUTH_SECRET` (a new long random value, at least 32 characters, never the one from your computer); `ADMIN_NAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD` for the first admin. Do **not** set `COOKIE_SECURE`. For online booking payments and emails also add the `RAZORPAY_...`, `SMTP_...` and `CRON_SECRET` values described under *Bookings & rentals*.
 2. **Build command:** `npm install && npm run build`. **Start command:** `npm run start:live`. It applies database changes, creates the first admin, branches and coach if the database is empty, then starts the app on the port the host gives it.
 3. **After the first start:** log in and change the admin password; fill in **Settings → Parent app** with the public address (so PIN messages carry the right link) and **Settings → Home page**; check the branches and the coach profile; then add students and send parents their PINs.
 4. **Backups:** download a copy of the database file (or use the host's volume backups) regularly. It holds everything, including photos.
@@ -234,6 +319,10 @@ SQLite suits a single computer. To deploy online with several users, switch to P
 ```
 app/(app)/            Logged-in pages (one folder per section, each with page.tsx + actions.ts)
 app/home/             Public home page and coach pages (shared header/footer in site.tsx, styles in home.css)
+app/book/             Customer booking site (facility list, booking form, account)
+app/(app)/bookings/   Staff bookings section (overview, calendar, facilities, pricing, payments, reports ...)
+app/api/rentals/      Payment webhook, report downloads, scheduled chores
+lib/rentals/          Booking engine: pricing, availability, booking and status rules, payments, equipment, notifications
 app/login/            Staff login page and login/logout actions
 app/parent/           Parent & student app (own login, own session cookie)
 app/receipt/          Printable receipt page for staff

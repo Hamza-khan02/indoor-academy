@@ -3,7 +3,7 @@
 import bcrypt from 'bcryptjs';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
-import { actionAdmin, actionUser } from '@/lib/auth';
+import { actionAdmin, actionStaff } from '@/lib/auth';
 import { USER_ROLES } from '@/lib/constants';
 import { FormError, email, oneOf, run, text } from '@/lib/form';
 
@@ -18,7 +18,7 @@ function newPassword(fd: FormData, key = 'password') {
 
 export async function changePassword(fd: FormData) {
   return run(async () => {
-    const me = await actionUser();
+    const me = await actionStaff();
     const user = await db.user.findUniqueOrThrow({ where: { id: me.id } });
     if (!(await bcrypt.compare(String(fd.get('current') ?? ''), user.passwordHash))) {
       throw new FormError('Your current password is incorrect.');

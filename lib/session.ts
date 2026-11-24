@@ -25,7 +25,7 @@ export async function signSession(payload: SessionPayload) {
 export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, secretKey(), { algorithms: ['HS256'] });
-    if (payload.typ === 'parent') return null; // a parent token never opens staff pages
+    if (payload.typ) return null; // a parent or customer token never opens staff pages
     if (typeof payload.uid !== 'string' || typeof payload.role !== 'string') return null;
     return { uid: payload.uid, role: payload.role };
   } catch {
@@ -53,6 +53,31 @@ export async function verifyParentSession(token: string): Promise<ParentSessionP
     const { payload } = await jwtVerify(token, secretKey(), { algorithms: ['HS256'] });
     if (payload.typ !== 'parent' || typeof payload.fid !== 'string' || typeof payload.v !== 'number') return null;
     return { fid: payload.fid, v: payload.v };
+  } catch {
+    return null;
+  }
+}
+
+// ---- Booking accounts of outside customers (their own cookie and token type) ----
+
+export const CUSTOMER_COOKIE = 'ia_customer';
+export const CUSTOMER_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+
+export type CustomerSessionPayload = { cid: string; v: number };
+
+export async function signCustomerSession(payload: CustomerSessionPayload) {
+  return new SignJWT({ ...payload, typ: 'customer' })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(`${CUSTOMER_MAX_AGE}s`)
+    .sign(secretKey());
+}
+
+export async function verifyCustomerSession(token: string): Promise<CustomerSessionPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, secretKey(), { algorithms: ['HS256'] });
+    if (payload.typ !== 'customer' || typeof payload.cid !== 'string' || typeof payload.v !== 'number') return null;
+    return { cid: payload.cid, v: payload.v };
   } catch {
     return null;
   }

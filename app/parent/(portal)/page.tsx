@@ -18,6 +18,7 @@ import { AttendanceBar, Empty, Panel, StatusPill } from '@/components/ui';
 import { PhotoEditor } from '@/components/PhotoEditor';
 import { photoUrl } from '@/lib/photos';
 import { removeChildPhoto, uploadChildPhoto } from '@/lib/photo-actions';
+import { FamilyBookings } from '@/components/rentals/FamilyBookings';
 
 const SKILLS = [['batting', 'Batting'], ['bowling', 'Bowling'], ['fielding', 'Fielding'], ['fitness', 'Fitness']] as const;
 type Scores = { batting: number; bowling: number; fielding: number; fitness: number };
@@ -189,6 +190,8 @@ export default async function ParentHome(props: { searchParams: Promise<{ child?
           </ul>
         </section>
       )}
+
+      <FamilyBookings studentId={student.id} studentName={student.name} />
 
       <div className="portal-grid">
         <Panel title="Training schedule" subtitle={student.batch ? `${student.batch.name} · ${student.batch.ageGroup}` : undefined}>

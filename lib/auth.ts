@@ -19,10 +19,20 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   });
 });
 
-/** For pages: send logged-out visitors to the login screen. */
-export async function requireUser() {
+/** A receptionist's login only works the bookings desk, not the academy app (students, fees, attendance ...). */
+const DESK_ONLY = 'RECEPTIONIST';
+
+/** For pages any staff member may open (the bookings desk, their own account). */
+export async function requireStaff() {
   const user = await getCurrentUser();
   if (!user) redirect('/login');
+  return user;
+}
+
+/** For pages of the academy app: send logged-out visitors to the login screen, and desk-only logins to the bookings desk. */
+export async function requireUser() {
+  const user = await requireStaff();
+  if (user.role === DESK_ONLY) redirect('/bookings');
   return user;
 }
 
@@ -35,6 +45,13 @@ export async function requireAdminPage() {
 
 /** For server actions: returns the user or throws a message shown in the form. */
 export async function actionUser() {
+  const user = await actionStaff();
+  if (user.role === DESK_ONLY) throw new FormError('Your login is for the bookings desk only.');
+  return user;
+}
+
+/** For server actions any staff member may run (bookings desk, own password). */
+export async function actionStaff() {
   const user = await getCurrentUser();
   if (!user) throw new FormError('Your session has expired. Please log in again.');
   return user;

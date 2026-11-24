@@ -19,34 +19,35 @@ model User {
   name         String
   email        String   @unique
   passwordHash String
-  role         String   @default("COACH") // ADMIN | COACH
+  role         String   @default("COACH") // ADMIN | COACH | RECEPTIONIST (bookings desk only)
   createdAt    DateTime @default(now())
 }
 
 model Branch {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  address   String?
-  mapsUrl   String? // Google Maps share link, e.g. https://maps.app.goo.gl/...
+  id               String           @id @default(cuid())
+  name             String           @unique
+  address          String?
+  mapsUrl          String? // Google Maps share link, e.g. https://maps.app.goo.gl/...
   // JSON list of facilities: [{ "key": "INDOOR_NETS", "detail": "3 nets" }, { "key": "CUSTOM", "label": "AC hall" }]
-  facilities String?
-  photos    BranchPhoto[]
-  createdAt DateTime  @default(now())
-  students  Student[]
-  batches   Batch[]
-  coaches   Coach[]
-  notices   Notice[]
+  facilities       String?
+  photos           BranchPhoto[]
+  createdAt        DateTime         @default(now())
+  students         Student[]
+  batches          Batch[]
+  coaches          Coach[]
+  notices          Notice[]
+  rentalFacilities RentalFacility[]
 }
 
 model Coach {
-  id             String   @id @default(cuid())
+  id             String      @id @default(cuid())
   name           String
   phone          String?
   email          String?
   specialization String? // Batting, Bowling, Fielding, Fitness, Head coach...
-  active         Boolean  @default(true)
+  active         Boolean     @default(true)
   branchId       String?
-  branch         Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  branch         Branch?     @relation(fields: [branchId], references: [id], onDelete: SetNull)
   batches        Batch[]
   // Public profile, shown on the coach's page of the public home page. All optional.
   bio            String?
@@ -59,7 +60,7 @@ model Coach {
   photo          CoachPhoto?
   // Set when a photo is saved; used as the image's cache-busting version. Null = no photo.
   photoUpdatedAt DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime    @default(now())
 }
 
 // Coach profile photo (public, unlike student photos). Small JPEG, resized in the browser.
@@ -183,40 +184,41 @@ model Notice {
 }
 
 model Student {
-  id            String       @id @default(cuid())
-  name          String
-  dob           String? // YYYY-MM-DD
-  ageGroup      String
-  playingRole   String? // Batter, Bowler, All-rounder, WK-Batter
-  guardianName  String?
-  guardianPhone String
+  id               String            @id @default(cuid())
+  name             String
+  dob              String? // YYYY-MM-DD
+  ageGroup         String
+  playingRole      String? // Batter, Bowler, All-rounder, WK-Batter
+  guardianName     String?
+  guardianPhone    String
   // guardianPhone as digits with country code (919876543210); links the student to a parent login.
   guardianPhoneKey String?
-  status        String       @default("ACTIVE") // ACTIVE | REVIEW | INACTIVE
-  joinedOn      String // YYYY-MM-DD
-  notes         String?
+  status           String            @default("ACTIVE") // ACTIVE | REVIEW | INACTIVE
+  joinedOn         String // YYYY-MM-DD
+  notes            String?
   // Health & emergency (visible to staff and the student's own family)
-  bloodGroup     String? // A+, A-, B+, B-, AB+, AB-, O+, O-
-  emergencyName  String?
-  emergencyPhone String?
-  medicalNotes   String? // allergies, asthma, injuries...
-  branchId      String
-  branch        Branch       @relation(fields: [branchId], references: [id], onDelete: Restrict)
-  batchId       String?
-  batch         Batch?       @relation(fields: [batchId], references: [id], onDelete: SetNull)
-  attendance    Attendance[]
-  payments      FeePayment[]
-  assessments   Assessment[]
-  reminders     Reminder[]
-  matchStats    PlayerMatchStat[]
-  squads        TournamentSquad[]
-  drillTargets  DrillStudent[]
-  drillsDone    DrillCompletion[]
-  progressNotes ProgressComment[]
-  photo         StudentPhoto?
+  bloodGroup       String? // A+, A-, B+, B-, AB+, AB-, O+, O-
+  emergencyName    String?
+  emergencyPhone   String?
+  medicalNotes     String? // allergies, asthma, injuries...
+  branchId         String
+  branch           Branch            @relation(fields: [branchId], references: [id], onDelete: Restrict)
+  batchId          String?
+  batch            Batch?            @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  attendance       Attendance[]
+  payments         FeePayment[]
+  assessments      Assessment[]
+  reminders        Reminder[]
+  matchStats       PlayerMatchStat[]
+  squads           TournamentSquad[]
+  drillTargets     DrillStudent[]
+  drillsDone       DrillCompletion[]
+  progressNotes    ProgressComment[]
+  photo            StudentPhoto?
   // Set when a profile photo is saved; used as the image's cache-busting version. Null = no photo.
-  photoUpdatedAt DateTime?
-  createdAt     DateTime     @default(now())
+  photoUpdatedAt   DateTime?
+  createdAt        DateTime          @default(now())
+  rentalBookings   RentalBooking[]
 
   @@index([branchId])
   @@index([batchId])
@@ -235,15 +237,17 @@ model StudentPhoto {
 
 // Parent / student app login. One per guardian phone; it shows every student with that phone.
 model FamilyLogin {
-  id             String    @id @default(cuid())
-  phoneKey       String    @unique // same format as Student.guardianPhoneKey
-  pinHash        String
-  active         Boolean   @default(true)
+  id                  String               @id @default(cuid())
+  phoneKey            String               @unique // same format as Student.guardianPhoneKey
+  pinHash             String
+  active              Boolean              @default(true)
   // Bumped on PIN reset or disable so older sessions stop working.
-  sessionVersion Int       @default(1)
-  lastLoginAt    DateTime?
-  createdBy      String?
-  createdAt      DateTime  @default(now())
+  sessionVersion      Int                  @default(1)
+  lastLoginAt         DateTime?
+  createdBy           String?
+  createdAt           DateTime             @default(now())
+  rentalBookings      RentalBooking[]
+  rentalNotifications RentalNotification[]
 }
 
 // A WhatsApp message opened for a parent (fee reminder or absence notice).
@@ -283,18 +287,18 @@ model Attendance {
 }
 
 model FeePayment {
-  id        String   @id @default(cuid())
-  amount    Int // rupees
-  forMonth  String // YYYY-MM the fee is for
-  paidOn    String // YYYY-MM-DD
-  method    String   @default("CASH") // CASH | UPI | CARD | BANK
-  reference String?
+  id         String   @id @default(cuid())
+  amount     Int // rupees
+  forMonth   String // YYYY-MM the fee is for
+  paidOn     String // YYYY-MM-DD
+  method     String   @default("CASH") // CASH | UPI | CARD | BANK
+  reference  String?
   // e.g. IA/2026-27/0001; numbered per Indian financial year (Apr-Mar), never reused.
-  receiptNo  String? @unique
+  receiptNo  String?  @unique
   recordedBy String?
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  studentId  String
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
 
   @@index([forMonth])
   @@index([paidOn])
@@ -317,17 +321,17 @@ model Assessment {
 }
 
 model Tournament {
-  id        String   @id @default(cuid())
+  id        String            @id @default(cuid())
   name      String
   startDate String // YYYY-MM-DD
   endDate   String?
   venue     String?
   ageGroup  String?
-  status    String   @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
+  status    String            @default("UPCOMING") // UPCOMING | ONGOING | COMPLETED
   result    String?
   squad     TournamentSquad[]
   matches   Match[]
-  createdAt DateTime @default(now())
+  createdAt DateTime          @default(now())
 }
 
 // Students selected for a tournament.
@@ -387,4 +391,388 @@ model PlayerMatchStat {
 
   @@unique([matchId, studentId])
   @@index([studentId])
+}
+
+// ---------------------------------------------------------------------------
+// Booking & rental management
+// Money is whole rupees. Days are 'YYYY-MM-DD' in India time, times are minutes from midnight.
+// ---------------------------------------------------------------------------
+
+// A bookable place or service: a set of nets, a turf, a practice pitch, the bowling machines,
+// or the equipment rental counter.
+model RentalFacility {
+  id               String             @id @default(cuid())
+  name             String
+  category         String // NETS | TURF | PITCH | BOWLING_MACHINE | EQUIPMENT
+  description      String?
+  status           String             @default("ACTIVE") // ACTIVE | MAINTENANCE | INACTIVE
+  maintenanceNote  String?
+  capacity         Int                @default(1) // people allowed in one booking
+  openTime         Int                @default(360) // minutes from midnight, quarter hours (06:00)
+  closeTime        Int                @default(1320) // 22:00
+  slotMinutes      Int                @default(60) // length of one bookable slot
+  maxSlots         Int                @default(4) // longest booking, in slots
+  requiresApproval Boolean            @default(false) // customer bookings wait for staff approval
+  sortOrder        Int                @default(0)
+  branchId         String?
+  branch           Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  pricing          RentalPricing?
+  resources        RentalResource[]
+  packages         RentalPackage[]
+  netPackages      RentalPackage[]    @relation("PackageNet")
+  blockouts        FacilityBlockout[]
+  bookings         RentalBooking[]
+  promos           RentalPromo[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  @@index([category])
+}
+
+// One unit that can be reserved: "Net 1", "Turf A", bowling machine "BM-01".
+model RentalResource {
+  id              String             @id @default(cuid())
+  facilityId      String
+  facility        RentalFacility     @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  name            String
+  code            String             @unique // unique ID shown to staff, e.g. NET-1, BM-01
+  status          String             @default("ACTIVE") // ACTIVE | MAINTENANCE | INACTIVE
+  maintenanceNote String?
+  // Bowling machines only
+  speedMin        Int? // km/h
+  speedMax        Int?
+  modes           String? // comma separated, e.g. "Pace,Spin,Swing"
+  notes           String?
+  slots           ResourceSlot[]
+  bookings        BookingResource[]
+  blockouts       FacilityBlockout[]
+  createdAt       DateTime           @default(now())
+
+  @@index([facilityId])
+}
+
+// How a facility is charged. One row per facility; equipment items carry their own price.
+model RentalPricing {
+  facilityId          String         @id
+  facility            RentalFacility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  unit                String         @default("PER_HOUR") // PER_30_MIN | PER_HOUR | PER_SESSION | PER_DAY | PER_ITEM
+  price               Int            @default(0) // per unit, for outside customers
+  studentDiscountPct  Int            @default(0) // % off for academy students
+  peakStart           Int? // minutes from midnight
+  peakEnd             Int?
+  peakSurchargePct    Int            @default(0)
+  weekendSurchargePct Int            @default(0)
+  securityDeposit     Int            @default(0) // refundable, on top of the booking amount
+  cancelFreeHours     Int            @default(24) // free cancellation until this many hours before the start
+  cancelChargePct     Int            @default(0) // charge after that, % of the booking amount
+  updatedBy           String?
+  updatedAt           DateTime       @updatedAt
+}
+
+// A way to book a facility, e.g. the bowling machine packages (machine only, machine + net ...).
+model RentalPackage {
+  id               String          @id @default(cuid())
+  facilityId       String
+  facility         RentalFacility  @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  kind             String          @default("CUSTOM") // MACHINE_ONLY | MACHINE_NET | MACHINE_OPERATOR | MACHINE_BALLS | COMPLETE | CUSTOM
+  name             String
+  description      String?
+  includesNet      Boolean         @default(false)
+  includesOperator Boolean         @default(false)
+  includesBalls    Boolean         @default(false)
+  netFacilityId    String? // the facility a net is reserved from, together with the machine
+  netFacility      RentalFacility? @relation("PackageNet", fields: [netFacilityId], references: [id], onDelete: SetNull)
+  pricePerUnit     Int? // replaces the facility price when set (combo price)
+  operatorCharge   Int             @default(0) // per pricing unit
+  ballsCharge      Int             @default(0) // once per booking
+  active           Boolean         @default(false)
+  sortOrder        Int             @default(0)
+  bookings         RentalBooking[]
+
+  @@index([facilityId])
+}
+
+model RentalPromo {
+  id          String          @id @default(cuid())
+  code        String          @unique
+  description String?
+  percentOff  Int             @default(0)
+  amountOff   Int             @default(0)
+  minAmount   Int             @default(0)
+  validFrom   String? // YYYY-MM-DD
+  validTo     String?
+  maxUses     Int?
+  usedCount   Int             @default(0)
+  facilityId  String? // null = any facility
+  facility    RentalFacility? @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  active      Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+}
+
+// Outside customers: people who are not academy families. Families book with their parent app login.
+model RentalCustomer {
+  id             String               @id @default(cuid())
+  name           String
+  phone          String
+  phoneKey       String               @unique // digits with country code, same format as Student.guardianPhoneKey
+  email          String?
+  passwordHash   String
+  active         Boolean              @default(true)
+  sessionVersion Int                  @default(1) // bumped on password change / switch off
+  lastLoginAt    DateTime?
+  bookings       RentalBooking[]
+  notifications  RentalNotification[]
+  createdAt      DateTime             @default(now())
+}
+
+model RentalBooking {
+  id              String               @id @default(cuid())
+  code            String               @unique // e.g. BK-2611-0001
+  kind            String               @default("FACILITY") // FACILITY | EQUIPMENT (equipment only)
+  facilityId      String
+  facility        RentalFacility       @relation(fields: [facilityId], references: [id], onDelete: Restrict)
+  packageId       String?
+  package         RentalPackage?       @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  // Who it is for. Online bookings have a customer or a family; walk-ins entered by staff may have neither.
+  customerId      String?
+  customer        RentalCustomer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  familyLoginId   String?
+  familyLogin     FamilyLogin?         @relation(fields: [familyLoginId], references: [id], onDelete: SetNull)
+  studentId       String?
+  student         Student?             @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  customerType    String               @default("OUTSIDE") // STUDENT | OUTSIDE
+  customerName    String
+  customerPhone   String
+  customerEmail   String?
+  players         Int?
+  // When
+  date            String // YYYY-MM-DD
+  startMin        Int
+  endMin          Int
+  returnDate      String? // equipment-only rentals: the day the items are due back
+  status          String               @default("PENDING")
+  // Money
+  subtotal        Int                  @default(0)
+  discount        Int                  @default(0)
+  extraCharges    Int                  @default(0) // damaged / missing equipment, added later
+  total           Int                  @default(0) // subtotal - discount + extraCharges
+  deposit         Int                  @default(0) // refundable security deposit, on top of total
+  paid            Int                  @default(0) // money received minus refunds
+  cancelCharge    Int                  @default(0)
+  promoCode       String?
+  priceLines      String               @default("[]") // JSON: how the price was worked out
+  paymentMethod   String               @default("PAY_AT_VENUE") // ONLINE | PAY_AT_VENUE
+  expiresAt       DateTime? // an unpaid hold is released after this
+  notes           String?
+  staffNotes      String?
+  cancelReason    String?
+  rescheduleCount Int                  @default(0)
+  source          String               @default("ONLINE") // ONLINE | STAFF
+  createdBy       String?
+  checkedInAt     DateTime?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  resources       BookingResource[]
+  slots           ResourceSlot[]
+  equipment       BookingEquipment[]
+  payments        RentalPayment[]
+  refunds         RentalRefund[]
+  audit           RentalAuditLog[]
+  notifications   RentalNotification[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([date])
+  @@index([status])
+  @@index([facilityId, date])
+  @@index([customerId])
+  @@index([familyLoginId])
+  @@index([studentId])
+  @@index([expiresAt])
+}
+
+// The units a booking uses (kept for history after the booking ends).
+model BookingResource {
+  bookingId  String
+  booking    RentalBooking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  resourceId String
+  resource   RentalResource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  role       String         @default("PRIMARY") // PRIMARY | NET (the net reserved with a bowling machine)
+
+  @@id([bookingId, resourceId])
+  @@index([resourceId])
+}
+
+// One held 15-minute block of one unit. The primary key makes it impossible for two bookings
+// to hold the same block, whatever the application code does. Rows are deleted when a booking
+// is cancelled, rejected, expired or marked no-show.
+model ResourceSlot {
+  resourceId String
+  resource   RentalResource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  date       String
+  block      Int // minutes from midnight / 15
+  bookingId  String
+  booking    RentalBooking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, date, block])
+  @@index([bookingId])
+}
+
+// Dates / timings when a facility (or one unit of it) cannot be booked.
+model FacilityBlockout {
+  id         String          @id @default(cuid())
+  facilityId String
+  facility   RentalFacility  @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  resourceId String? // null = every unit of the facility
+  resource   RentalResource? @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  kind       String          @default("BLOCKED") // MAINTENANCE | BLOCKED
+  fromDate   String
+  toDate     String
+  startMin   Int? // null = the whole day
+  endMin     Int?
+  reason     String?
+  createdBy  String?
+  createdAt  DateTime        @default(now())
+
+  @@index([facilityId, fromDate, toDate])
+}
+
+model EquipmentItem {
+  id              String              @id @default(cuid())
+  code            String              @unique
+  name            String
+  category        String              @default("OTHER") // BAT | BALL | PADS | GLOVES | HELMET | STUMPS | OTHER
+  totalQty        Int                 @default(0)
+  damagedQty      Int                 @default(0) // out of service until repaired or written off
+  condition       String              @default("GOOD") // GOOD | FAIR | WORN
+  rentalPrice     Int                 @default(0) // per item
+  priceUnit       String              @default("PER_ITEM") // PER_ITEM (per booking) | PER_DAY
+  replacementCost Int                 @default(0) // charged when an item is lost
+  active          Boolean             @default(true)
+  notes           String?
+  lines           BookingEquipment[]
+  movements       EquipmentMovement[]
+  createdAt       DateTime            @default(now())
+}
+
+// Equipment on a booking, and where it is in: Reserved -> Issued -> Returned -> Inspected.
+model BookingEquipment {
+  id          String        @id @default(cuid())
+  bookingId   String
+  booking     RentalBooking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  itemId      String
+  item        EquipmentItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  qty         Int
+  unitPrice   Int
+  status      String        @default("RESERVED") // RESERVED | ISSUED | RETURNED | INSPECTED | RELEASED
+  dueDate     String? // the day the items are due back
+  issuedAt    DateTime?
+  returnedAt  DateTime?
+  inspectedAt DateTime?
+  damagedQty  Int           @default(0)
+  missingQty  Int           @default(0)
+  charge      Int           @default(0)
+  note        String?
+
+  @@index([bookingId])
+  @@index([itemId, status])
+}
+
+model EquipmentMovement {
+  id        String        @id @default(cuid())
+  itemId    String
+  item      EquipmentItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  bookingId String?
+  type      String // RESERVED | ISSUED | RETURNED | INSPECTED | DAMAGED | MISSING | REPAIRED | ADJUSTED | RELEASED
+  qty       Int
+  note      String?
+  actor     String?
+  createdAt DateTime      @default(now())
+
+  @@index([itemId, createdAt])
+}
+
+model RentalPayment {
+  id               String         @id @default(cuid())
+  bookingId        String
+  booking          RentalBooking  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  amount           Int
+  method           String // CASH | UPI_QR | CARD | BANK | ONLINE
+  status           String         @default("PAID") // CREATED (online order, not paid yet) | PAID | FAILED
+  reference        String?
+  gateway          String? // RAZORPAY
+  gatewayOrderId   String?        @unique
+  gatewayPaymentId String?        @unique
+  receiptNo        String?        @unique
+  recordedBy       String?
+  paidAt           DateTime?
+  refunds          RentalRefund[]
+  createdAt        DateTime       @default(now())
+
+  @@index([bookingId])
+  @@index([paidAt])
+}
+
+model RentalRefund {
+  id              String         @id @default(cuid())
+  bookingId       String
+  booking         RentalBooking  @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  paymentId       String?
+  payment         RentalPayment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  amount          Int
+  reason          String?
+  status          String         @default("PENDING") // PENDING | PROCESSED | REJECTED
+  method          String?
+  reference       String?
+  gatewayRefundId String?        @unique
+  requestedBy     String?
+  processedBy     String?
+  processedAt     DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([bookingId])
+  @@index([status])
+}
+
+// Who did what, and when. Never edited or deleted by the app.
+model RentalAuditLog {
+  id        String         @id @default(cuid())
+  bookingId String?
+  booking   RentalBooking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  entity    String // BOOKING | PAYMENT | REFUND | FACILITY | RESOURCE | PRICING | PACKAGE | PROMO | EQUIPMENT | BLOCKOUT | CUSTOMER | SETTINGS
+  entityId  String?
+  action    String
+  detail    String?
+  actorType String // STAFF | CUSTOMER | FAMILY | SYSTEM | GATEWAY
+  actorName String?
+  createdAt DateTime       @default(now())
+
+  @@index([bookingId])
+  @@index([createdAt])
+  @@index([entity, entityId])
+}
+
+// A message to a customer: shown in their booking account, and emailed when email is set up.
+model RentalNotification {
+  id            String          @id @default(cuid())
+  type          String // BOOKING_RECEIVED | BOOKING_CONFIRMED | PAYMENT | REMINDER | CANCELLED | RESCHEDULED | RETURN_REMINDER | REFUND | REJECTED | EXPIRED
+  title         String
+  body          String
+  dedupeKey     String?         @unique // stops a reminder being sent twice
+  bookingId     String?
+  booking       RentalBooking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customerId    String?
+  customer      RentalCustomer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  familyLoginId String?
+  familyLogin   FamilyLogin?    @relation(fields: [familyLoginId], references: [id], onDelete: Cascade)
+  emailTo       String?
+  emailStatus   String          @default("NONE") // NONE | SENT | FAILED | NOT_CONFIGURED
+  emailError    String?
+  readAt        DateTime?
+  createdAt     DateTime        @default(now())
+
+  @@index([customerId, createdAt])
+  @@index([familyLoginId, createdAt])
+  @@index([bookingId])
 }

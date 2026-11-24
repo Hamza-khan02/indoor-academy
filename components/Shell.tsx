@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Activity, CalendarDays, ChartNoAxesCombined, ChevronRight, CircleDollarSign, ClipboardCheck, LayoutDashboard,
+  Activity, CalendarDays, CalendarRange, ChartNoAxesCombined, ChevronRight, CircleDollarSign, ClipboardCheck, LayoutDashboard,
   FileBarChart, ListChecks, LogOut, MapPin, Megaphone, Menu, Search, Settings, Swords, Trophy, UserRound, Users, X,
 } from 'lucide-react';
 import { logout } from '@/app/login/actions';
@@ -46,9 +46,14 @@ export function Shell({ user, studentCount, branchCount, children }: Props) {
   const [query, setQuery] = useState('');
   const searchRef = useRef<HTMLInputElement>(null);
   const isAdmin = user.role === 'ADMIN';
+  // A receptionist works the bookings desk only; a coach sees facility schedules.
+  const deskOnly = user.role === 'RECEPTIONIST';
+  const BOOKINGS = isAdmin || deskOnly
+    ? [{ href: '/bookings', label: 'Bookings & rentals', icon: CalendarRange }]
+    : [{ href: '/bookings/calendar', label: 'Facility schedule', icon: CalendarRange }];
 
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/'));
-  const current = [...WORKSPACE, ...MANAGEMENT].find((n) => isActive(n.href));
+  const current = [...WORKSPACE, ...BOOKINGS, ...MANAGEMENT].find((n) => isActive(n.href));
 
   // Close the mobile menu after navigating.
   useEffect(() => setMobileOpen(false), [pathname]);
@@ -71,7 +76,7 @@ export function Shell({ user, studentCount, branchCount, children }: Props) {
     router.push(q ? `/students?q=${encodeURIComponent(q)}` : '/students');
   }
 
-  const navLink = (n: (typeof WORKSPACE)[number]) =>
+  const navLink = (n: { href: string; label: string; icon: typeof CalendarRange; adminOnly?: boolean }) =>
     (!n.adminOnly || isAdmin) && (
       <Link key={n.href} href={n.href} className={`nav-item ${isActive(n.href) ? 'active' : ''}`}>
         <n.icon size={18} />
@@ -99,10 +104,16 @@ export function Shell({ user, studentCount, branchCount, children }: Props) {
               <strong>{branchCount} {branchCount === 1 ? 'branch' : 'branches'}</strong>
             </div>
           </div>
-          <div className="nav-label">WORKSPACE</div>
-          <nav>{WORKSPACE.map(navLink)}</nav>
+          {!deskOnly && (
+            <>
+              <div className="nav-label">WORKSPACE</div>
+              <nav>{WORKSPACE.map(navLink)}</nav>
+            </>
+          )}
+          <div className={`nav-label${deskOnly ? '' : ' manage-label'}`}>BOOKINGS</div>
+          <nav>{BOOKINGS.map(navLink)}</nav>
           <div className="nav-label manage-label">MANAGEMENT</div>
-          <nav>{MANAGEMENT.map(navLink)}</nav>
+          <nav>{(deskOnly ? MANAGEMENT.filter((n) => n.href === '/settings') : MANAGEMENT).map(navLink)}</nav>
           <div className="sidebar-bottom">
             <div className="profile">
               <div className="avatar admin">{initials(user.name)}</div>
@@ -122,11 +133,11 @@ export function Shell({ user, studentCount, branchCount, children }: Props) {
             <button className="menu-button icon-button" onClick={() => setMobileOpen(true)} aria-label="Open menu"><Menu size={20} /></button>
             <div className="crumb">Workspace <ChevronRight size={14} /> <b>{current?.label ?? 'Overview'}</b></div>
             <div className="top-actions">
-              <form className="searchbox" onSubmit={onSearch} role="search">
+              {!deskOnly && <form className="searchbox" onSubmit={onSearch} role="search">
                 <Search size={16} />
                 <input ref={searchRef} placeholder="Search students..." value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search students" />
                 <kbd>Ctrl K</kbd>
-              </form>
+              </form>}
               <div className="top-avatar" title={user.name}>{initials(user.name)}</div>
             </div>
           </header>

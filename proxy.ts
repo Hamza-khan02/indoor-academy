@@ -15,6 +15,15 @@ export async function proxy(req: NextRequest) {
   if (pathname === '/home' || pathname.startsWith('/home/') || pathname.startsWith('/api/coach-photo/') || pathname === '/robots.txt') {
     return NextResponse.next();
   }
+  // The booking site: the facility list is public; booking, accounts and receipts check the customer's
+  // (or family's, or staff member's) login themselves. The payment webhook and the scheduled chores
+  // are called by machines and check a signature / secret key instead of a login.
+  if (
+    pathname === '/book' || pathname.startsWith('/book/') || pathname.startsWith('/rental-receipt/')
+    || pathname === '/api/rentals/webhook' || pathname === '/api/rentals/housekeeping'
+  ) {
+    return NextResponse.next();
+  }
 
   if (pathname === '/parent' || pathname.startsWith('/parent/')) {
     if (pathname === '/parent/login') return NextResponse.next();
@@ -40,6 +49,13 @@ export async function proxy(req: NextRequest) {
     const url = new URL('/login', req.url);
     url.searchParams.set('next', pathname + search);
     return NextResponse.redirect(url);
+  }
+  // A receptionist's login is for the bookings desk only (pages and actions check this again against the database).
+  if (session?.role === 'RECEPTIONIST') {
+    const allowed = ['/bookings', '/settings', '/login', '/api/rentals/', '/api/branch-photo/'];
+    if (!allowed.some((p) => pathname === p || pathname.startsWith(p.endsWith('/') ? p : `${p}/`))) {
+      return NextResponse.redirect(new URL('/bookings', req.url));
+    }
   }
   // Logged-in visitors on /login are redirected by the login page itself, after it
   // confirms the user still exists (avoids a loop for deleted users with old cookies).

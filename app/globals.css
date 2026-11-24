@@ -15,7 +15,7 @@ small.block { display:block; margin-top:3px }
 
 /* ---------- Shell ---------- */
 .app-shell { min-height:100vh; display:flex }
-.sidebar { width:252px; background:#101014; border-right:1px solid #242429; padding:24px 14px 16px; display:flex; flex-direction:column; flex-shrink:0; position:fixed; inset:0 auto 0 0; z-index:20; overflow-y:auto }
+.sidebar { width:252px; background:#101014; border-right:1px solid #242429; padding:24px 14px 16px; display:flex; flex-direction:column; flex-shrink:0; position:fixed; inset:0 auto 0 0; z-index:20; overflow-y:auto; scrollbar-width:thin; scrollbar-color:#2e2e35 transparent }
 .brand { display:flex; align-items:center; gap:10px; padding:0 9px 25px; border-bottom:1px solid #25252a }
 .brand-mark { width:37px; height:37px; background:var(--red); border-radius:9px; display:grid; place-items:center; position:relative; overflow:hidden; flex-shrink:0 }
 .brand-mark span { font:700 15px 'Space Grotesk'; letter-spacing:-1px }
