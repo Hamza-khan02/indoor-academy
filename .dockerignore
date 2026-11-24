@@ -1,0 +1,16 @@
+# Kept out of the container image: installed packages and build output (rebuilt inside it), local
+# settings and secrets, and the local database files (the live database lives on the host's disk).
+.git
+node_modules
+.next
+.next-*
+.env
+.env.*
+!.env.example
+prisma/*.db
+prisma/*.db-journal
+*.tsbuildinfo
+next-env.d.ts
+.claude
+.railway
+.vscode

@@ -308,6 +308,19 @@ Whichever host you choose:
 
 The live app starts with an empty database. To carry over what is on your computer, copy `prisma/dev.db` to the host's disk under the name used in `DATABASE_URL` before the first start.
 
+### On Railway
+
+The project has a `Dockerfile`, which Railway builds automatically. Each time the container starts it runs the same steps as `npm run start:live`. Set-up with the Railway command-line tool, run in the project folder (`npx @railway/cli <command>`):
+
+1. `login`, then `init --name indoor-academy` and `add --service indoor-academy`.
+2. `scale southeast-asia=1 iad=0` puts the app in Singapore, the region closest to India. `scale` adds regions rather than replacing them, so the region Railway picked by default (`iad` here) must be set to 0; plans below Pro run in one region only. Do this before adding the volume: moving a service that has a volume to another region later means some downtime.
+3. `volume add --mount-path /data` adds the disk that holds the database.
+4. `variable set` for `DATABASE_URL="file:/data/academy.db"`, `AUTH_SECRET` (new and random), `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` and `PORT="3000"`.
+5. `up` uploads the project folder and deploys it. Files listed in `.gitignore`, such as `.env` and the local database, are left behind. Run `up` again after every change.
+6. `domain --port 3000` creates the free `….up.railway.app` address.
+
+Railway's Free, Trial and Hobby plans block email over SMTP, so leave the `SMTP_...` values out there. Booking emails then stay off; in-app notifications and WhatsApp links still work. To back up the database, download it: `volume files download /academy.db ./academy-backup.db --volume indoor-academy-volume`.
+
 Search engines are told (in `/robots.txt`) to list only the home page and coach pages; everything behind a login stays out of search results.
 
 ## Moving to a hosted database
