@@ -25,6 +25,7 @@ export default async function LoginPage({ searchParams }: { searchParams: { next
         <p className="login-sub">Use the account given to you by the academy administrator.</p>
         <LoginForm next={next} />
         <p className="login-alt">Parent or student? <Link href="/parent/login">Parent app login</Link></p>
+        <p className="login-alt login-home"><Link href="/home" prefetch={false}>← Back to home page</Link></p>
       </section>
     </main>
   );

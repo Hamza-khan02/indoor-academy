@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { db } from './db';
-import { actionUser } from './auth';
+import { actionAdmin, actionUser } from './auth';
 import { getFamily } from './family';
 import { FormError, run } from './form';
 import { MAX_PHOTO_BYTES, imageType } from './photos';
@@ -50,6 +50,34 @@ export async function removeStudentPhoto(studentId: string) {
   return run(async () => {
     await actionUser();
     await deletePhoto(studentId);
+    revalidatePath('/', 'layout');
+    return 'Photo removed';
+  });
+}
+
+// ---- Coach photos (admin only; shown on the public home page) ----
+
+export async function uploadCoachPhoto(coachId: string, fd: FormData) {
+  return run(async () => {
+    const user = await actionAdmin();
+    if (!(await db.coach.findUnique({ where: { id: coachId }, select: { id: true } }))) throw new FormError('This coach no longer exists.');
+    const photo = await readPhoto(fd);
+    await db.$transaction([
+      db.coachPhoto.upsert({ where: { coachId }, create: { coachId, ...photo, updatedBy: user.name }, update: { ...photo, updatedBy: user.name } }),
+      db.coach.update({ where: { id: coachId }, data: { photoUpdatedAt: new Date() } }),
+    ]);
+    revalidatePath('/', 'layout');
+    return 'Photo updated';
+  });
+}
+
+export async function removeCoachPhoto(coachId: string) {
+  return run(async () => {
+    await actionAdmin();
+    await db.$transaction([
+      db.coachPhoto.deleteMany({ where: { coachId } }),
+      db.coach.update({ where: { id: coachId }, data: { photoUpdatedAt: null } }),
+    ]);
     revalidatePath('/', 'layout');
     return 'Photo removed';
   });

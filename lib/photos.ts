@@ -8,6 +8,11 @@ export function photoUrl(student: { id: string; photoUpdatedAt?: Date | null }) 
   return student.photoUpdatedAt ? `/api/photo/${student.id}?v=${student.photoUpdatedAt.getTime()}` : null;
 }
 
+/** Same for a coach's photo. Coach photos are public (shown on the home page). */
+export function coachPhotoUrl(coach: { id: string; photoUpdatedAt?: Date | null }) {
+  return coach.photoUpdatedAt ? `/api/coach-photo/${coach.id}?v=${coach.photoUpdatedAt.getTime()}` : null;
+}
+
 /** Detects the real image type from the file's first bytes (never trust the file name). */
 export function imageType(bytes: Uint8Array): 'image/jpeg' | 'image/png' | 'image/webp' | null {
   if (bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg';

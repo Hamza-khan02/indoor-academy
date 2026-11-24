@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { db } from './db';
 import { actionAdmin, actionUser } from './auth';
 import { FormError, phone, run, text } from './form';
+import { SOCIAL_LABELS, socialError, socialUrl, type SocialPlatform } from './social';
 
 /** Records that a WhatsApp message (reminder, absence notice or receipt) was opened for a parent. */
 export async function logReminder(studentId: string, kind: string, ref: string) {
@@ -49,6 +50,26 @@ export async function updateMessageSettings(fd: FormData) {
       parentAccessTemplate: text(fd, 'parentAccessTemplate', { required: true, label: 'Parent app login message', max: 1000 }),
     });
     return 'WhatsApp messages saved';
+  });
+}
+
+/** Footer of the public home page: about line, timings and social media links. */
+export async function updateHomeSettings(fd: FormData) {
+  return run(async () => {
+    await actionAdmin();
+    const link = (platform: SocialPlatform, key: string) => {
+      const url = socialUrl(platform, text(fd, key, { label: SOCIAL_LABELS[platform], max: 200 }));
+      if (url === null) throw new FormError(socialError(platform));
+      return url;
+    };
+    await saveSettings({
+      homeAbout: text(fd, 'homeAbout', { label: 'About line', max: 220 }) ?? '',
+      academyHours: text(fd, 'academyHours', { label: 'Timings', max: 200 }) ?? '',
+      instagramUrl: link('instagram', 'instagramUrl'),
+      facebookUrl: link('facebook', 'facebookUrl'),
+      youtubeUrl: link('youtube', 'youtubeUrl'),
+    });
+    return 'Home page details saved';
   });
 }
 

@@ -6,8 +6,18 @@ import { formatDate, monthLabel } from './dates';
 import { inr } from './format';
 
 export type ReceiptSettings = { receiptPrefix: string; academyAddress: string; academyPhone: string; receiptNote: string };
+/** Shown in the footer of the public home page. Empty values are hidden. */
+export type HomeSettings = { homeAbout: string; academyHours: string; instagramUrl: string; facebookUrl: string; youtubeUrl: string };
 /** publicUrl: where parents open the app once it is online, e.g. https://academy.example.com */
-export type AppSettings = MessageSettings & ReceiptSettings & { publicUrl: string };
+export type AppSettings = MessageSettings & ReceiptSettings & HomeSettings & { publicUrl: string };
+
+export const DEFAULT_HOME_SETTINGS: HomeSettings = {
+  homeAbout: "Cricket coaching in Sultanpur for players from U-10 to Open, with every player's progress recorded and shared with parents.",
+  academyHours: '',
+  instagramUrl: '',
+  facebookUrl: '',
+  youtubeUrl: '',
+};
 
 export const DEFAULT_RECEIPT_SETTINGS: ReceiptSettings = {
   receiptPrefix: DEFAULT_RECEIPT_PREFIX,
@@ -16,7 +26,7 @@ export const DEFAULT_RECEIPT_SETTINGS: ReceiptSettings = {
   receiptNote: 'This is a computer-generated receipt.',
 };
 
-const DEFAULTS: AppSettings = { ...DEFAULT_MESSAGE_SETTINGS, ...DEFAULT_RECEIPT_SETTINGS, publicUrl: '' };
+const DEFAULTS: AppSettings = { ...DEFAULT_MESSAGE_SETTINGS, ...DEFAULT_RECEIPT_SETTINGS, ...DEFAULT_HOME_SETTINGS, publicUrl: '' };
 
 /** Academy details, WhatsApp templates and receipt settings, falling back to defaults for anything not saved. */
 export async function getSettings(): Promise<AppSettings> {

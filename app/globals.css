@@ -371,6 +371,9 @@ a.player-cell:hover b { color:#ff8a8a }
 /* ---------- Parent app ---------- */
 .login-alt { margin:18px 0 0; text-align:center; font-size:11px; color:#85858f }
 .login-alt a { color:#f16b6b; font-weight:600 }
+.login-alt.login-home { margin-top:10px }
+.login-alt.login-home a { color:#85858f; font-weight:500 }
+.login-alt.login-home a:hover { color:#eee }
 .portal { min-height:100vh; display:flex; flex-direction:column }
 .portal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid #242429; background:#101014; position:sticky; top:0; z-index:10 }
 .portal-brand { padding:0; border:0 }
@@ -455,6 +458,12 @@ a.player-cell:hover b { color:#ff8a8a }
 .text-btn.subtle:hover { color:#f87171 }
 .photo-editor small { font-size:10px; text-align:center; max-width:160px }
 .profile-head .photo-editor .avatar, .portal-hero .photo-editor .avatar { width:72px; height:72px; font-size:22px; border-radius:18px }
+
+/* Coach public profile form (the modal opens from inside a table, which sets nowrap) */
+.modal { white-space:normal }
+.form input[hidden] { display:none }
+.coach-photo-row { display:flex; align-items:center; gap:16px; margin-bottom:16px }
+.coach-photo-row .form-hint { margin:0; flex:1; min-width:0 }
 
 /* ---------- Health, matches & squads ---------- */
 .form-section { border:1px solid #2b2b31; border-radius:10px; padding:12px 12px 0; margin:4px 0 14px }

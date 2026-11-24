@@ -48,7 +48,28 @@ model Coach {
   branchId       String?
   branch         Branch?  @relation(fields: [branchId], references: [id], onDelete: SetNull)
   batches        Batch[]
+  // Public profile, shown on the coach's page of the public home page. All optional.
+  bio            String?
+  coachingSince  Int? // year the coach started coaching, e.g. 2012
+  experience     String? // experience and qualifications, one per line
+  achievements   String? // trophies and awards, one per line; a line may start with a year: "2019 - Best coach"
+  instagramUrl   String?
+  facebookUrl    String?
+  youtubeUrl     String?
+  photo          CoachPhoto?
+  // Set when a photo is saved; used as the image's cache-busting version. Null = no photo.
+  photoUpdatedAt DateTime?
   createdAt      DateTime @default(now())
+}
+
+// Coach profile photo (public, unlike student photos). Small JPEG, resized in the browser.
+model CoachPhoto {
+  coachId   String   @id
+  coach     Coach    @relation(fields: [coachId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+  updatedBy String?
+  updatedAt DateTime @updatedAt
 }
 
 model Batch {

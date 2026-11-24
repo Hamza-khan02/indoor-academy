@@ -7,7 +7,7 @@ import { displayPhone, ensurePhoneKeys } from '@/lib/family';
 import { deleteFamilyLogin, setFamilyLoginActive, updatePortalSettings } from '@/lib/family-actions';
 import { ParentAccessButton } from '@/components/ParentAccessButton';
 import { financialYear, formatReceiptNo } from '@/lib/receipts';
-import { updateReceiptSettings } from '@/lib/reminder-actions';
+import { updateHomeSettings, updateReceiptSettings } from '@/lib/reminder-actions';
 import { FormModal } from '@/components/FormModal';
 import { ConfirmAction } from '@/components/ConfirmAction';
 import { Avatar, PageHeader, Panel } from '@/components/ui';
@@ -172,6 +172,33 @@ export default async function SettingsPage() {
             <dt>Phone</dt><dd>{messageSettings.academyPhone || <span className="muted">Not set</span>}</dd>
             <dt>Next receipt</dt><dd>{nextReceipt}</dd>
             <dt>Footer note</dt><dd>{messageSettings.receiptNote || <span className="muted">None</span>}</dd>
+          </dl>
+        </Panel>
+      )}
+
+      {messageSettings && (
+        <Panel
+          title="Home page"
+          subtitle="The public page people see before logging in. These details appear in its footer; empty ones are hidden."
+          className="spaced-bottom"
+          action={
+            <FormModal title="Home page details" eyebrow="HOME PAGE" trigger={<><Pencil size={14} /> Edit</>} triggerClassName="text-btn" action={updateHomeSettings} submitLabel="Save details">
+              <label>About the academy (one or two lines)<textarea name="homeAbout" rows={2} maxLength={220} defaultValue={messageSettings.homeAbout} /></label>
+              <label>Timings<textarea name="academyHours" rows={2} maxLength={200} defaultValue={messageSettings.academyHours} placeholder={'Mon–Sat: 6–9 AM, 4–8 PM\nSunday: closed'} /></label>
+              <label>Instagram page<input name="instagramUrl" maxLength={200} defaultValue={messageSettings.instagramUrl} placeholder="instagram.com/yourpage" /></label>
+              <label>Facebook page<input name="facebookUrl" maxLength={200} defaultValue={messageSettings.facebookUrl} placeholder="facebook.com/yourpage" /></label>
+              <label>YouTube channel<input name="youtubeUrl" maxLength={200} defaultValue={messageSettings.youtubeUrl} placeholder="youtube.com/@yourchannel" /></label>
+              <p className="form-hint">The phone, address and academy name on the home page come from Receipt details and WhatsApp messages.</p>
+            </FormModal>
+          }
+        >
+          <dl className="details">
+            <dt>About</dt><dd>{messageSettings.homeAbout || <span className="muted">Not set</span>}</dd>
+            <dt>Timings</dt><dd style={{ whiteSpace: 'pre-line' }}>{messageSettings.academyHours || <span className="muted">Not set</span>}</dd>
+            <dt>Instagram</dt><dd>{messageSettings.instagramUrl || <span className="muted">Not set</span>}</dd>
+            <dt>Facebook</dt><dd>{messageSettings.facebookUrl || <span className="muted">Not set</span>}</dd>
+            <dt>YouTube</dt><dd>{messageSettings.youtubeUrl || <span className="muted">Not set</span>}</dd>
+            <dt>Preview</dt><dd><a href="/home" target="_blank" rel="noopener noreferrer">Open the home page</a></dd>
           </dl>
         </Panel>
       )}

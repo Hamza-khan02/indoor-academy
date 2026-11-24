@@ -38,6 +38,25 @@ The seed creates the admin user, the academy's two branches (**Sultanpur City** 
 6. **Fees & Finance**: see who owes fees this month and record payments.
 7. **Performance**: coaches rate batting, bowling, fielding and fitness (1–10).
 
+## Public home page
+
+Anyone who opens the app's address without logging in sees the academy's home page: what the academy trains, how progress is tracked, the branches, the coaches and how to get in touch. Staff who are logged in still get the dashboard at the same address, and can preview the home page at **`/home`**.
+
+- Everything on it comes from data you already manage: academy name, phone and address (**Settings**), branches with their address, facilities and Google Maps link (**Branches**), active batches with days and timings (**Batches & Sessions**) and active coaches (**Coaches**). Sections with no data are hidden.
+- **Settings → Home page** (admin) holds the rest: the short "about" line, the academy's timings, and the Instagram, Facebook and YouTube links. Timings show in the top bar and footer, the links as icons in both. Anything left empty is hidden. Only real Instagram, Facebook and YouTube addresses are accepted (for Instagram, `@yourpage` also works).
+- **Enquire on WhatsApp** and **Call** use the academy phone from Settings. On phones a Call / WhatsApp bar stays at the bottom of the screen, and the menu button opens the section links and both logins.
+- It is public, so it never shows students, fees, branch photos, notices or coaches' phone numbers. The rating, match and attendance cards beside the headline are a fixed sample, not a real student.
+- **Parent login** and **Staff login** are in the top bar and the footer.
+
+### Coach profile pages
+
+Each active coach's card on the home page opens that coach's own public page (`/home/coach/...`) with their photo, experience, trophies and awards, social media links and the batches they coach.
+
+- **Coaches → Edit profile** (admin) fills it in: photo, a few lines about the coach, the year they started coaching (the page works out "14+ years" itself), experience and qualifications (one per line), trophies and awards (one per line; start a line with the year, e.g. `2019 - District champions`, to show the year as a tag), and Instagram, Facebook and YouTube links. Anything left empty is hidden; a coach with nothing filled in shows a short "profile is being updated" note.
+- The ↗ icon next to **Edit profile** opens the public page. Inactive coaches have no public page.
+- The coach's phone and email are never shown. **Enquire on WhatsApp** and **Call** on the page go to the academy's number.
+- Coach photos are public (unlike student and branch photos), because they are on the home page.
+
 ## WhatsApp reminders
 
 Green **WhatsApp** buttons open WhatsApp (phone app or WhatsApp Web) with a message already typed for the parent; you press Send. This uses free `wa.me` links, so no WhatsApp Business account or API is needed, and messages go from your own WhatsApp number.
@@ -195,6 +214,7 @@ SQLite suits a single computer. To deploy online with several users, switch to P
 
 ```
 app/(app)/            Logged-in pages (one folder per section, each with page.tsx + actions.ts)
+app/home/             Public home page and coach pages (shared header/footer in site.tsx, styles in home.css)
 app/login/            Staff login page and login/logout actions
 app/parent/           Parent & student app (own login, own session cookie)
 app/receipt/          Printable receipt page for staff
@@ -202,5 +222,5 @@ app/api/export/       CSV downloads
 components/           Shared UI (sidebar shell, modal form, toast, chart)
 lib/                  Database client, auth/session, dates (IST), validation, queries
 prisma/               Schema, migrations and seed script
-middleware.ts         Sends logged-out visitors to /login (staff) or /parent/login (parents)
+middleware.ts         Shows logged-out visitors the home page at "/", keeps /home/... public, and sends them to /login (staff) or /parent/login (parents) elsewhere
 ```

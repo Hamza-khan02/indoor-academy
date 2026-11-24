@@ -28,6 +28,7 @@ export default async function ParentLoginPage() {
         </p>
         <ParentLoginForm />
         <p className="login-alt">Academy staff? <Link href="/login">Staff login</Link></p>
+        <p className="login-alt login-home"><Link href="/home" prefetch={false}>← Back to home page</Link></p>
       </section>
     </main>
   );
